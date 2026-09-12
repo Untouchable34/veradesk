@@ -39,6 +39,9 @@ class ConnectionPage extends StatefulWidget implements PageShape {
 class _ConnectionPageState extends State<ConnectionPage> {
   /// Controller for the id input bar.
   final _idController = IDTextEditingController();
+  // VeraDesk: şifre ID ile aynı adımda girilir; boş bırakılırsa kayıtlı şifre kullanılır.
+  final _pwdController = TextEditingController();
+  final _pwdVisible = false.obs;
   final RxBool _idEmpty = true.obs;
 
   final FocusNode _idFocusNode = FocusNode();
@@ -100,7 +103,9 @@ class _ConnectionPageState extends State<ConnectionPage> {
   /// Connects to the selected peer.
   void onConnect() {
     var id = _idController.id;
-    connect(context, id);
+    final pwd = _pwdController.text;
+    connect(context, id, password: pwd.isEmpty ? null : pwd);
+    if (pwd.isNotEmpty) _pwdController.clear();
   }
 
   void onFocusChanged() {
@@ -348,11 +353,44 @@ class _ConnectionPageState extends State<ConnectionPage> {
         ),
       ),
     );
+    final pw = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 2),
+      child: Ink(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.all(Radius.circular(13)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 8),
+          child: Obx(() => TextField(
+                controller: _pwdController,
+                obscureText: !_pwdVisible.value,
+                autocorrect: false,
+                enableSuggestions: false,
+                maxLines: 1,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: translate('Password (leave empty if remembered)'),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                        _pwdVisible.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: MyTheme.darkGray),
+                    onPressed: () => _pwdVisible.value = !_pwdVisible.value,
+                  ),
+                ),
+                onSubmitted: (_) => onConnect(),
+              )),
+        ),
+      ),
+    );
     final child = Column(children: [
       if (isWebDesktop)
         getConnectionPageTitle(context, true)
             .marginOnly(bottom: 10, top: 15, left: 12),
-      w
+      w,
+      pw,
     ]);
     return Align(
         alignment: Alignment.topCenter,
@@ -363,6 +401,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
   void dispose() {
     _uniLinksSubscription?.cancel();
     _idController.dispose();
+    _pwdController.dispose();
     _idFocusNode.removeListener(onFocusChanged);
     _allPeersLoader.clear();
     _idFocusNode.dispose();

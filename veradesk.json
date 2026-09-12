@@ -6,7 +6,8 @@
     "default-remember-password": "Y",
     "enable-check-update": "Y",
     "allow-auto-update": "N",
-    "prompt-permanent-password-on-first-run": "Y"
+    "prompt-permanent-password-on-first-run": "Y",
+    "allow-hide-cm": "Y"
   },
   "override-settings": {
   }

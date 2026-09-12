@@ -200,6 +200,10 @@ class _ConnectionPageState extends State<ConnectionPage>
     with SingleTickerProviderStateMixin, WindowListener {
   /// Controller for the id input bar.
   final _idController = IDTextEditingController();
+  // VeraDesk: şifre ID ile aynı adımda girilir; boş bırakılırsa kayıtlı şifre kullanılır.
+  final _pwdController = TextEditingController();
+  final _pwdFocusNode = FocusNode();
+  final _pwdVisible = false.obs;
 
   final RxBool _idInputFocused = false.obs;
   final FocusNode _idFocusNode = FocusNode();
@@ -239,6 +243,8 @@ class _ConnectionPageState extends State<ConnectionPage>
   @override
   void dispose() {
     _idController.dispose();
+    _pwdController.dispose();
+    _pwdFocusNode.dispose();
     windowManager.removeListener(this);
     _allPeersLoader.clear();
     _idFocusNode.removeListener(onFocusChanged);
@@ -333,11 +339,14 @@ class _ConnectionPageState extends State<ConnectionPage>
       bool isTerminal = false,
       bool isTcpTunneling = false}) {
     var id = _idController.id;
+    final pwd = _pwdController.text;
     connect(context, id,
         isFileTransfer: isFileTransfer,
         isViewCamera: isViewCamera,
         isTerminal: isTerminal,
-        isTcpTunneling: isTcpTunneling);
+        isTcpTunneling: isTcpTunneling,
+        password: pwd.isEmpty ? null : pwd);
+    if (pwd.isNotEmpty) _pwdController.clear();
   }
 
   /// UI for the remote ID TextField.
@@ -514,6 +523,41 @@ class _ConnectionPageState extends State<ConnectionPage>
                   },
                 )),
               ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Obx(() => TextField(
+                    focusNode: _pwdFocusNode,
+                    controller: _pwdController,
+                    obscureText: !_pwdVisible.value,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      fontFamily: 'WorkSans',
+                      fontSize: 16,
+                      height: 1.4,
+                    ),
+                    cursorColor: Theme.of(context).textTheme.titleLarge?.color,
+                    decoration: InputDecoration(
+                      filled: false,
+                      counterText: '',
+                      hintText:
+                          translate('Password (leave empty if remembered)'),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 10),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                            _pwdVisible.value
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            size: 18),
+                        onPressed: () =>
+                            _pwdVisible.value = !_pwdVisible.value,
+                      ),
+                    ),
+                    onSubmitted: (_) => onConnect(),
+                  ).workaroundFreezeLinuxMint()),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 13.0),

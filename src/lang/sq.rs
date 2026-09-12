@@ -778,5 +778,6 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("The screen sharing request ended without completing on the remote device", "Kërkesa për ndarjen e ekranit në pajisjen e largët përfundoi pa u kryer"),
         ("VeraDesk could not obtain a usable screen from the XDG Desktop Portal, the PipeWire library may be too old", "VeraDesk nuk mori një ekran të përdorshëm nga XDG Desktop Portal, biblioteka PipeWire mund të jetë shumë e vjetër"),
         ("VeraDesk could not load a GStreamer component needed for screen capture ({})", "VeraDesk nuk mundi të ngarkojë një komponent të GStreamer të nevojshëm për regjistrimin e ekranit ({})"),
+        ("Password (leave empty if remembered)", ""),
     ].iter().cloned().collect();
 }

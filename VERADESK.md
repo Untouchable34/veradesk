@@ -18,6 +18,8 @@ bağlantısı korunur.
 | Gömülü ayarlar | `veradesk.json`, `src/common.rs::load_custom_client` | İmzalı `custom.txt` yerine derleme zamanında gömülen JSON. `default-settings` ilk değer, `override-settings` zorunlu değer. |
 | Kalıcı şifre | `veradesk.json` | `verification-method=use-permanent-password`, `approve-mode=password`. |
 | Şifreyi hatırla | `src/client.rs`, `veradesk.json` (`default-remember-password`) | Bağlantı diyaloğunda "Şifreyi hatırla" yeni cihazlar için de işaretli gelir. |
+| Tek adımda bağlan | `flutter/lib/desktop/pages/connection_page.dart`, `flutter/lib/mobile/pages/connection_page.dart` | ID alanının altında şifre alanı; doluysa `connect(password:)` ile gönderilir, boşsa kayıtlı şifre kullanılır. |
+| Onaysız bağlantı | `veradesk.json` (`approve-mode=password`, `allow-hide-cm=Y`) | Şifre doğruysa onay penceresi yok, bağlantı yöneticisi paneli de gizli. Ayarlardan geri açılabilir. |
 | Sürüm kontrolü | `src/common.rs::do_check_software_update` | üst projenin sürüm API'si yerine GitHub Releases API (`VERADESK_GITHUB_REPO`). |
 | Güncelleme indirme | `src/updater.rs` | GitHub allow-list `VERADESK_GITHUB_REPO` deposuna bakar. |
 | API sunucusu | `src/common.rs::get_api_server_` | üst projenin yönetim sunucusu yerine `http://rd.veranilsoft.com:21114` (şu an böyle bir servis yok; giriş/adres defteri senkronu devre dışı sayılır). |
@@ -82,6 +84,8 @@ cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/aarc
 export JAVA_HOME=$HOME/development/jdk17/Contents/Home ANDROID_HOME=$HOME/development/android
 (cd flutter && flutter build apk --release --target-platform android-arm64 --split-per-abi)
 ```
+
+**Dikkat:** Android bağımlılıkları aynı vcpkg kök dizinine kurulunca manifest modu macOS'un `ffmpeg:arm64-osx` paketini kaldırıyor. Android sonrası macOS derlemesi için `vcpkg install --triplet arm64-osx` komutunu yeniden çalıştır (binary cache sayesinde saniyeler sürer).
 
 Gradle `cargo`yu çağırdığı için `~/.cargo/bin` PATH'te olmalı. Release imzası
 `flutter/android/key.properties` (git dışı) → `~/Desktop/remote/keys/veradesk-release.jks`.
