@@ -3,10 +3,10 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter_hbb/common.dart';
-import 'package:flutter_hbb/models/input_model.dart';
-import 'package:flutter_hbb/models/model.dart';
-import 'package:flutter_hbb/utils/image.dart';
+import 'package:veradesk/common.dart';
+import 'package:veradesk/models/input_model.dart';
+import 'package:veradesk/models/model.dart';
+import 'package:veradesk/utils/image.dart';
 import 'package:provider/provider.dart';
 
 const int _kDotCount = 60;

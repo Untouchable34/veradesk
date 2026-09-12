@@ -3,10 +3,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hbb/common/shared_state.dart';
-import 'package:flutter_hbb/common/widgets/toolbar.dart';
-import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/models/chat_model.dart';
+import 'package:veradesk/common/shared_state.dart';
+import 'package:veradesk/common/widgets/toolbar.dart';
+import 'package:veradesk/consts.dart';
+import 'package:veradesk/models/chat_model.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -196,7 +196,7 @@ class _ViewCameraPageState extends State<ViewCameraPage>
         return false;
       },
       child: Scaffold(
-          // workaround for https://github.com/rustdesk/rustdesk/issues/3131
+          // workaround for https://github.com/rustdesk/veradesk/issues/3131
           floatingActionButtonLocation: keyboardIsVisible
               ? FABLocation(FloatingActionButtonLocation.endFloat, 0, -35)
               : null,

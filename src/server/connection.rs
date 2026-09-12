@@ -254,8 +254,8 @@ pub struct Connection {
     server: super::ServerPtrWeak,
     hash: Hash,
     read_jobs: Vec<fs::TransferJob>,
-    timer: crate::RustDeskInterval,
-    file_timer: crate::RustDeskInterval,
+    timer: crate::VeraDeskInterval,
+    file_timer: crate::VeraDeskInterval,
     file_transfer: Option<(String, bool)>,
     view_camera: bool,
     terminal: bool,
@@ -299,7 +299,7 @@ pub struct Connection {
     tx_input: std_mpsc::Sender<MessageInput>,
     // handle input messages
     video_ack_required: bool,
-    // Diagnostics only, gated by `RUSTDESK_QOS_VERBOSE`: how long the shared
+    // Diagnostics only, gated by `VERADESK_QOS_VERBOSE`: how long the shared
     // write path blocked this second.  The video send is inline in the message
     // loop, so a slow write also delays the delay probe and its reply.
     video_send_max_ms: u32,
@@ -473,8 +473,8 @@ impl Connection {
             server,
             hash,
             read_jobs: Vec::new(),
-            timer: crate::rustdesk_interval(time::interval(SEC30)),
-            file_timer: crate::rustdesk_interval(time::interval(SEC30)),
+            timer: crate::veradesk_interval(time::interval(SEC30)),
+            file_timer: crate::veradesk_interval(time::interval(SEC30)),
             file_transfer: None,
             view_camera: false,
             terminal: false,
@@ -596,7 +596,7 @@ impl Connection {
             conn.send_permission(Permission::PrivacyMode, false).await;
         }
         let mut test_delay_timer =
-            crate::rustdesk_interval(time::interval_at(Instant::now(), TEST_DELAY_TIMEOUT));
+            crate::veradesk_interval(time::interval_at(Instant::now(), TEST_DELAY_TIMEOUT));
         let mut last_recv_time = Instant::now();
 
         // The connection type is not known until the login request arrives;
@@ -605,7 +605,7 @@ impl Connection {
 
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
         std::thread::spawn(move || Self::handle_input(_rx_input, tx_cloned));
-        let mut second_timer = crate::rustdesk_interval(time::interval(Duration::from_secs(1)));
+        let mut second_timer = crate::veradesk_interval(time::interval(Duration::from_secs(1)));
 
         #[cfg(feature = "unix-file-copy-paste")]
         let rx_clip_holder;
@@ -943,7 +943,7 @@ impl Connection {
                             }
                         }
                     } else {
-                        conn.file_timer = crate::rustdesk_interval(time::interval_at(Instant::now() + SEC30, SEC30));
+                        conn.file_timer = crate::veradesk_interval(time::interval_at(Instant::now() + SEC30, SEC30));
                     }
                 }
                 Ok(conns) = hbbs_rx.recv() => {
@@ -2719,7 +2719,7 @@ impl Connection {
                 let tx_from_cm_clone = p.tx_from_cm.clone();
                 if let Err(err) = start_ipc(p.rx_to_cm, p.tx_from_cm).await {
                     log::warn!("ipc to connection manager exit: {}", err);
-                    // https://github.com/rustdesk/rustdesk-server-pro/discussions/382#discussioncomment-10525725, cm may start failed
+                    // https://github.com/rustdesk/veradesk-server-pro/discussions/382#discussioncomment-10525725, cm may start failed
                     #[cfg(windows)]
                     if !crate::platform::is_prelogin()
                         && !err.to_string().contains(crate::platform::EXPLORER_EXE)
@@ -2865,7 +2865,7 @@ impl Connection {
                 self.try_start_cm_ipc();
             }
 
-            // https://github.com/rustdesk/rustdesk-server-pro/discussions/646
+            // https://github.com/rustdesk/veradesk-server-pro/discussions/646
             // `is_logon` is used to check login with `OPTION_ALLOW_LOGON_SCREEN_PASSWORD` == "Y".
             // `is_logon_ui()` is a fallback for logon UI detection on Windows.
             #[cfg(target_os = "windows")]
@@ -3189,7 +3189,7 @@ impl Connection {
                         if is_enter(&me) {
                             CLICK_TIME.store(get_time(), Ordering::SeqCst);
                         }
-                        // https://github.com/rustdesk/rustdesk/issues/8633
+                        // https://github.com/rustdesk/veradesk/issues/8633
                         MOUSE_MOVE_TIME.store(get_time(), Ordering::SeqCst);
 
                         let key = match me.mode.enum_value() {
@@ -3210,7 +3210,7 @@ impl Connection {
                         // handle all down as press
                         // fix unexpected repeating key on remote linux, seems also fix abnormal alt/shift, which
                         // make sure all key are released
-                        // https://github.com/rustdesk/rustdesk/issues/6793
+                        // https://github.com/rustdesk/veradesk/issues/6793
                         let is_press = if cfg!(target_os = "linux") {
                             (me.press || me.down) && !(crate::is_modifier(&me) || key.is_some())
                         } else {
@@ -3578,7 +3578,7 @@ impl Connection {
                             Some(file_action::Union::Receive(r)) => {
                                 // client to server
                                 // note: 1.1.10 introduced identical file detection, which breaks original logic of send/recv files
-                                // whenever got send/recv request, check peer version to ensure old version of rustdesk
+                                // whenever got send/recv request, check peer version to ensure old version of veradesk
                                 let od = can_enable_overwrite_detection(get_version_number(
                                     &self.lr.version,
                                 ));
@@ -4647,7 +4647,7 @@ impl Connection {
                     let name = display.name();
                     #[cfg(windows)]
                     if let Some(_ok) =
-                        virtual_display_manager::rustdesk_idd::change_resolution_if_is_virtual_display(
+                        virtual_display_manager::veradesk_idd::change_resolution_if_is_virtual_display(
                             &name,
                             r.width as _,
                             r.height as _,
@@ -5331,7 +5331,7 @@ impl Connection {
         job.is_remote = true;
         job.conn_id = self.inner.id();
         self.read_jobs.push(job);
-        self.file_timer = crate::rustdesk_interval(time::interval(MILLI1));
+        self.file_timer = crate::veradesk_interval(time::interval(MILLI1));
         let audit_path = if job_type == fs::JobType::Printer {
             "Remote print".to_owned()
         } else {
@@ -6046,7 +6046,7 @@ impl Connection {
     #[cfg(all(target_os = "windows", feature = "flutter"))]
     async fn send_printer_request(&mut self, data: Vec<u8>) {
         // This path is only used to identify the printer job.
-        let path = format!("RustDesk://FsJob//Printer/{}", get_time());
+        let path = format!("VeraDesk://FsJob//Printer/{}", get_time());
 
         let msg = fs::new_send(0, fs::JobType::Printer, path.clone(), 1, false);
         self.send(msg).await;

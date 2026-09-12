@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=VeraDesk
+NoDisplay=true
+MimeType=x-scheme-handler/veradesk;
+TryExec=veradesk
+Exec=veradesk %u
+Icon=veradesk
+Terminal=false
+Type=Application
+StartupNotify=false
+StartupWMClass=veradesk

@@ -1,10 +1,10 @@
-Name:       rustdesk
+Name:       veradesk
 Version:    1.5.0
 Release:    0
 Summary:    RPM package
 License:    GPL-3.0
-URL:        https://rustdesk.com
-Vendor:     rustdesk <info@rustdesk.com>
+URL:        https://veranilsoft.com
+Vendor:     veradesk <info@veranilsoft.com>
 Requires:   gtk3 libxcb libXfixes alsa-lib libva2 gstreamer1-plugins-base
 Recommends: libayatana-appindicator-gtk3 libxdo
 
@@ -23,27 +23,27 @@ The best open-source remote desktop client software, written in Rust.
 
 %install
 mkdir -p %{buildroot}/usr/bin/
-mkdir -p %{buildroot}/usr/share/rustdesk/
-mkdir -p %{buildroot}/usr/share/rustdesk/files/
+mkdir -p %{buildroot}/usr/share/veradesk/
+mkdir -p %{buildroot}/usr/share/veradesk/files/
 mkdir -p %{buildroot}/usr/share/icons/hicolor/256x256/apps/
 mkdir -p %{buildroot}/usr/share/icons/hicolor/scalable/apps/
-install -m 755 $HBB/target/release/rustdesk %{buildroot}/usr/bin/rustdesk
-install $HBB/libsciter-gtk.so %{buildroot}/usr/share/rustdesk/libsciter-gtk.so
-install $HBB/res/rustdesk.service %{buildroot}/usr/share/rustdesk/files/
-install $HBB/res/128x128@2x.png %{buildroot}/usr/share/icons/hicolor/256x256/apps/rustdesk.png
-install $HBB/res/scalable.svg %{buildroot}/usr/share/icons/hicolor/scalable/apps/rustdesk.svg
-install $HBB/res/rustdesk.desktop %{buildroot}/usr/share/rustdesk/files/
-install $HBB/res/rustdesk-link.desktop %{buildroot}/usr/share/rustdesk/files/
+install -m 755 $HBB/target/release/veradesk %{buildroot}/usr/bin/veradesk
+install $HBB/libsciter-gtk.so %{buildroot}/usr/share/veradesk/libsciter-gtk.so
+install $HBB/res/veradesk.service %{buildroot}/usr/share/veradesk/files/
+install $HBB/res/128x128@2x.png %{buildroot}/usr/share/icons/hicolor/256x256/apps/veradesk.png
+install $HBB/res/scalable.svg %{buildroot}/usr/share/icons/hicolor/scalable/apps/veradesk.svg
+install $HBB/res/veradesk.desktop %{buildroot}/usr/share/veradesk/files/
+install $HBB/res/veradesk-link.desktop %{buildroot}/usr/share/veradesk/files/
 
 %files
-/usr/bin/rustdesk
-/usr/share/rustdesk/libsciter-gtk.so
-/usr/share/rustdesk/files/rustdesk.service
-/usr/share/icons/hicolor/256x256/apps/rustdesk.png
-/usr/share/icons/hicolor/scalable/apps/rustdesk.svg
-/usr/share/rustdesk/files/rustdesk.desktop
-/usr/share/rustdesk/files/rustdesk-link.desktop
-/usr/share/rustdesk/files/__pycache__/*
+/usr/bin/veradesk
+/usr/share/veradesk/libsciter-gtk.so
+/usr/share/veradesk/files/veradesk.service
+/usr/share/icons/hicolor/256x256/apps/veradesk.png
+/usr/share/icons/hicolor/scalable/apps/veradesk.svg
+/usr/share/veradesk/files/veradesk.desktop
+/usr/share/veradesk/files/veradesk-link.desktop
+/usr/share/veradesk/files/__pycache__/*
 
 %changelog
 # let's skip this for now
@@ -56,26 +56,26 @@ case "$1" in
   ;;
   2)
     # for upgrade
-    systemctl stop rustdesk || true
+    systemctl stop veradesk || true
   ;;
 esac
 
 %post
-cp /usr/share/rustdesk/files/rustdesk.service /etc/systemd/system/rustdesk.service
-cp /usr/share/rustdesk/files/rustdesk.desktop /usr/share/applications/
-cp /usr/share/rustdesk/files/rustdesk-link.desktop /usr/share/applications/
+cp /usr/share/veradesk/files/veradesk.service /etc/systemd/system/veradesk.service
+cp /usr/share/veradesk/files/veradesk.desktop /usr/share/applications/
+cp /usr/share/veradesk/files/veradesk-link.desktop /usr/share/applications/
 systemctl daemon-reload
-systemctl enable rustdesk
-systemctl start rustdesk
+systemctl enable veradesk
+systemctl start veradesk
 update-desktop-database
 
 %preun
 case "$1" in
   0)
     # for uninstall
-    systemctl stop rustdesk || true
-    systemctl disable rustdesk || true
-    rm /etc/systemd/system/rustdesk.service || true
+    systemctl stop veradesk || true
+    systemctl disable veradesk || true
+    rm /etc/systemd/system/veradesk.service || true
   ;;
   1)
     # for upgrade
@@ -86,8 +86,8 @@ esac
 case "$1" in
   0)
     # for uninstall
-    rm /usr/share/applications/rustdesk.desktop || true
-    rm /usr/share/applications/rustdesk-link.desktop || true
+    rm /usr/share/applications/veradesk.desktop || true
+    rm /usr/share/applications/veradesk-link.desktop || true
     update-desktop-database
   ;;
   1)

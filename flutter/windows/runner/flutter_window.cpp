@@ -30,7 +30,7 @@ namespace {
 // until a real resize re-enters OnWindowSizeChanged, which resets the resize
 // target and resends the window metrics. That is why minimize/restore heals
 // it; ForceChildRefresh() below does the same programmatically.
-// https://github.com/rustdesk/rustdesk/issues/6756
+// https://github.com/rustdesk/veradesk/issues/6756
 // https://github.com/flutter/flutter/issues/159630
 //
 // The timer below drives that recovery. Two subtleties, verified against the
@@ -62,7 +62,7 @@ constexpr UINT kForceRedrawCheapTries = 2;
 // Re-enters the embedder's OnWindowSizeChanged by nudging the Flutter child
 // window by 1px and back: this resets the resize target and resends the window
 // metrics. Same as BaseFlutterWindow::ForceChildRefresh() on the
-// rustdesk_desktop_multi_window side.
+// veradesk_desktop_multi_window side.
 void ForceChildRefresh(HWND child) {
   if (!child) {
     return;
@@ -103,7 +103,7 @@ bool FlutterWindow::OnCreate() {
 
   flutter::MethodChannel<> channel(
     flutter_controller_->engine()->messenger(),
-    "org.rustdesk.rustdesk/host",
+    "org.veradesk.veradesk/host",
     &flutter::StandardMethodCodec::GetInstance());
 
   channel.SetMethodCallHandler(
@@ -208,7 +208,7 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
           // one or under a debugger (see main.cpp), and this fires on end-user
           // machines. OutputDebugString is readable with DebugView there.
           OutputDebugStringA(
-              "rustdesk: Flutter window did not render its first frame, "
+              "veradesk: Flutter window did not render its first frame, "
               "giving up.\n");
           KillTimer(hwnd, kForceRedrawTimerId);
         } else if (force_redraw_tries_ <= kForceRedrawCheapTries) {

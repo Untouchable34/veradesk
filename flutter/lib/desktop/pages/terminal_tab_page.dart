@@ -4,15 +4,15 @@ import 'dart:convert';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hbb/common.dart';
-import 'package:flutter_hbb/common/widgets/dialog.dart';
-import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/models/state_model.dart';
-import 'package:flutter_hbb/desktop/widgets/tabbar_widget.dart';
-import 'package:flutter_hbb/utils/multi_window_manager.dart';
-import 'package:flutter_hbb/models/model.dart';
-import 'package:flutter_hbb/models/terminal_copy_shortcut.dart';
-import 'package:flutter_hbb/models/terminal_model.dart';
+import 'package:veradesk/common.dart';
+import 'package:veradesk/common/widgets/dialog.dart';
+import 'package:veradesk/consts.dart';
+import 'package:veradesk/models/state_model.dart';
+import 'package:veradesk/desktop/widgets/tabbar_widget.dart';
+import 'package:veradesk/utils/multi_window_manager.dart';
+import 'package:veradesk/models/model.dart';
+import 'package:veradesk/models/terminal_copy_shortcut.dart';
+import 'package:veradesk/models/terminal_model.dart';
 import 'package:get/get.dart';
 
 import '../../models/platform_model.dart';
@@ -501,7 +501,7 @@ class _TerminalTabPageState extends State<TerminalTabPage> {
     // Add keyboard shortcut handler
     HardwareKeyboard.instance.addHandler(_handleKeyEvent);
 
-    rustDeskWinManager.setMethodHandler((call, fromWindowId) async {
+    veraDeskWinManager.setMethodHandler((call, fromWindowId) async {
       print(
           "[Remote Terminal] call ${call.method} with args ${call.arguments} from window $fromWindowId");
       if (call.method == kWindowEventNewTerminal) {

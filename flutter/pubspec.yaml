@@ -1,5 +1,5 @@
-name: flutter_hbb
-description: Your Remote Desktop Software
+name: veradesk
+description: VeraDesk - Remote Desktop by Veranilsoft
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -57,7 +57,7 @@ dependencies:
       ref: cf4aef0512092fad9344a27ffe1c47ad83269dfc
   desktop_multi_window:
     git:
-      url: https://github.com/rustdesk-org/rustdesk_desktop_multi_window
+      url: https://github.com/rustdesk-org/veradesk_desktop_multi_window
       ref: 8b774a66671cbb9bcb2631af6ac28f9bdd469ce3
   freezed_annotation: ^2.0.3
   flutter_custom_cursor:

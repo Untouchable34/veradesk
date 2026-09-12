@@ -2,21 +2,21 @@ import 'dart:ui' as ui;
 
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hbb/common/widgets/address_book.dart';
-import 'package:flutter_hbb/common/widgets/dialog.dart';
-import 'package:flutter_hbb/common/widgets/my_group.dart';
-import 'package:flutter_hbb/common/widgets/peers_view.dart';
-import 'package:flutter_hbb/common/widgets/peer_card.dart';
-import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/desktop/widgets/popup_menu.dart';
-import 'package:flutter_hbb/desktop/widgets/material_mod_popup_menu.dart'
+import 'package:veradesk/common/widgets/address_book.dart';
+import 'package:veradesk/common/widgets/dialog.dart';
+import 'package:veradesk/common/widgets/my_group.dart';
+import 'package:veradesk/common/widgets/peers_view.dart';
+import 'package:veradesk/common/widgets/peer_card.dart';
+import 'package:veradesk/consts.dart';
+import 'package:veradesk/desktop/widgets/popup_menu.dart';
+import 'package:veradesk/desktop/widgets/material_mod_popup_menu.dart'
     as mod_menu;
-import 'package:flutter_hbb/desktop/widgets/tabbar_widget.dart';
-import 'package:flutter_hbb/models/ab_model.dart';
-import 'package:flutter_hbb/models/peer_model.dart';
+import 'package:veradesk/desktop/widgets/tabbar_widget.dart';
+import 'package:veradesk/models/ab_model.dart';
+import 'package:veradesk/models/peer_model.dart';
 
-import 'package:flutter_hbb/models/peer_tab_model.dart';
-import 'package:flutter_hbb/models/state_model.dart';
+import 'package:veradesk/models/peer_tab_model.dart';
+import 'package:veradesk/models/state_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';

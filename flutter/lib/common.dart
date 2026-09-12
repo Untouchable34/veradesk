@@ -8,15 +8,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hbb/common/formatter/id_formatter.dart';
-import 'package:flutter_hbb/desktop/widgets/refresh_wrapper.dart';
-import 'package:flutter_hbb/desktop/widgets/tabbar_widget.dart';
-import 'package:flutter_hbb/main.dart';
-import 'package:flutter_hbb/models/peer_model.dart';
-import 'package:flutter_hbb/models/peer_tab_model.dart';
-import 'package:flutter_hbb/models/state_model.dart';
-import 'package:flutter_hbb/utils/multi_window_manager.dart';
-import 'package:flutter_hbb/utils/platform_channel.dart';
+import 'package:veradesk/common/formatter/id_formatter.dart';
+import 'package:veradesk/desktop/widgets/refresh_wrapper.dart';
+import 'package:veradesk/desktop/widgets/tabbar_widget.dart';
+import 'package:veradesk/main.dart';
+import 'package:veradesk/models/peer_model.dart';
+import 'package:veradesk/models/peer_tab_model.dart';
+import 'package:veradesk/models/state_model.dart';
+import 'package:veradesk/utils/multi_window_manager.dart';
+import 'package:veradesk/utils/platform_channel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_rx/src/rx_workers/utils/debouncer.dart';
@@ -37,15 +37,15 @@ import 'mobile/pages/terminal_page.dart';
 import 'desktop/pages/remote_page.dart' as desktop_remote;
 import 'desktop/pages/file_manager_page.dart' as desktop_file_manager;
 import 'desktop/pages/view_camera_page.dart' as desktop_view_camera;
-import 'package:flutter_hbb/desktop/widgets/remote_toolbar.dart';
+import 'package:veradesk/desktop/widgets/remote_toolbar.dart';
 import 'models/model.dart';
 import 'models/platform_model.dart';
 
-import 'package:flutter_hbb/native/win32.dart'
-    if (dart.library.html) 'package:flutter_hbb/web/win32.dart';
-import 'package:flutter_hbb/native/common.dart'
-    if (dart.library.html) 'package:flutter_hbb/web/common.dart';
-import 'package:flutter_hbb/utils/http_service.dart' as http;
+import 'package:veradesk/native/win32.dart'
+    if (dart.library.html) 'package:veradesk/web/win32.dart';
+import 'package:veradesk/native/common.dart'
+    if (dart.library.html) 'package:veradesk/web/common.dart';
+import 'package:veradesk/utils/http_service.dart' as http;
 
 final globalKey = GlobalKey<NavigatorState>();
 final navigationBarKey = GlobalKey();
@@ -742,12 +742,12 @@ Future<void> windowOnTop(int? id) async {
     }
     await windowManager.show();
     await windowManager.focus();
-    await rustDeskWinManager.registerActiveWindow(kWindowMainId);
+    await veraDeskWinManager.registerActiveWindow(kWindowMainId);
   } else {
     WindowController.fromWindowId(id)
       ..focus()
       ..show();
-    rustDeskWinManager.call(WindowType.Main, kWindowEventShow, {"id": id});
+    veraDeskWinManager.call(WindowType.Main, kWindowEventShow, {"id": id});
   }
 }
 
@@ -1232,7 +1232,7 @@ void msgBox(SessionID sessionId, String type, String title, String text,
     if (onSubmit != null) {
       onSubmit.call();
     } else {
-      // https://github.com/rustdesk/rustdesk/blob/5e9a31340b899822090a3731769ae79c6bf5f3e5/src/ui/common.tis#L263
+      // https://github.com/rustdesk/veradesk/blob/5e9a31340b899822090a3731769ae79c6bf5f3e5/src/ui/common.tis#L263
       if (!type.contains("custom") && desktopType != DesktopType.portForward) {
         closeConnection();
       }
@@ -2026,7 +2026,7 @@ Future<Offset?> _adjustRestoreMainWindowOffset(
 Future<bool> restoreWindowPosition(WindowType type,
     {int? windowId, String? peerId, int? display}) async {
   if (bind
-      .mainGetEnv(key: "DISABLE_RUSTDESK_RESTORE_WINDOW_POSITION")
+      .mainGetEnv(key: "DISABLE_VERADESK_RESTORE_WINDOW_POSITION")
       .isNotEmpty) {
     return false;
   }
@@ -2062,13 +2062,13 @@ Future<bool> restoreWindowPosition(WindowType type,
           await windowManager.center();
         }
         // For MacOS, the window is already centered by default.
-        // See https://github.com/rustdesk/rustdesk/blob/9b9276e7524523d7f667fefcd0694d981443df0e/flutter/macos/Runner/Base.lproj/MainMenu.xib#L333
+        // See https://github.com/rustdesk/veradesk/blob/9b9276e7524523d7f667fefcd0694d981443df0e/flutter/macos/Runner/Base.lproj/MainMenu.xib#L333
         // If `<windowPositionMask>` in `<window>` is not set, the window will be centered.
         break;
       default:
         // No need to change the position of a sub window if no position is saved,
         // since the default position is already centered.
-        // https://github.com/rustdesk/rustdesk/blob/317639169359936f7f9f85ef445ec9774218772d/flutter/lib/utils/multi_window_manager.dart#L163
+        // https://github.com/rustdesk/veradesk/blob/317639169359936f7f9f85ef445ec9774218772d/flutter/lib/utils/multi_window_manager.dart#L163
         break;
     }
     return true;
@@ -2125,7 +2125,7 @@ Future<bool> restoreWindowPosition(WindowType type,
             // E.g. There are two monitors, the left one is 100% DPI and the right one is 175% DPI.
             // The window belongs to the left monitor, but if it is moved a little to the right, it will belong to the right monitor.
             // After restoring, the size will be incorrect.
-            // See known issue in https://github.com/rustdesk/rustdesk/pull/9840
+            // See known issue in https://github.com/rustdesk/veradesk/pull/9840
             await windowManager.setSize(size,
                 ignoreDevicePixelRatio: _ignoreDevicePixelRatio);
           }
@@ -2257,7 +2257,7 @@ bool handleUriLink({List<String>? cmdArgs, Uri? uri, String? uriString}) {
   List<String>? args;
   if (cmdArgs != null && cmdArgs.isNotEmpty) {
     args = cmdArgs;
-    // rustdesk <uri link>
+    // veradesk <uri link>
     if (args[0].startsWith(bind.mainUriPrefixSync())) {
       final uri = Uri.tryParse(args[0]);
       if (uri != null) {
@@ -2344,7 +2344,7 @@ bool handleUriLink({List<String>? cmdArgs, Uri? uri, String? uriString}) {
     switch (type) {
       case UriLinkType.remoteDesktop:
         Future.delayed(Duration.zero, () {
-          rustDeskWinManager.newRemoteDesktop(id!,
+          veraDeskWinManager.newRemoteDesktop(id!,
               password: password,
               switchUuid: switchUuid,
               forceRelay: forceRelay);
@@ -2352,31 +2352,31 @@ bool handleUriLink({List<String>? cmdArgs, Uri? uri, String? uriString}) {
         break;
       case UriLinkType.fileTransfer:
         Future.delayed(Duration.zero, () {
-          rustDeskWinManager.newFileTransfer(id!,
+          veraDeskWinManager.newFileTransfer(id!,
               password: password, forceRelay: forceRelay);
         });
         break;
       case UriLinkType.viewCamera:
         Future.delayed(Duration.zero, () {
-          rustDeskWinManager.newViewCamera(id!,
+          veraDeskWinManager.newViewCamera(id!,
               password: password, forceRelay: forceRelay);
         });
         break;
       case UriLinkType.portForward:
         Future.delayed(Duration.zero, () {
-          rustDeskWinManager.newPortForward(id!, false,
+          veraDeskWinManager.newPortForward(id!, false,
               password: password, forceRelay: forceRelay);
         });
         break;
       case UriLinkType.rdp:
         Future.delayed(Duration.zero, () {
-          rustDeskWinManager.newPortForward(id!, true,
+          veraDeskWinManager.newPortForward(id!, true,
               password: password, forceRelay: forceRelay);
         });
         break;
       case UriLinkType.terminal:
         Future.delayed(Duration.zero, () {
-          rustDeskWinManager.newTerminal(id!,
+          veraDeskWinManager.newTerminal(id!,
               password: password, forceRelay: forceRelay);
         });
         break;
@@ -2415,7 +2415,7 @@ List<String>? urlLinkToCmdArgs(Uri uri) {
               'Y';
       if (!allowDeepLinkServerSettings) {
         debugPrint(
-            "Ignore rustdesk://config because $kOptionAllowDeepLinkServerSettings is not enabled.");
+            "Ignore veradesk://config because $kOptionAllowDeepLinkServerSettings is not enabled.");
         // Keep the user-facing error generic; detailed rejection reason is in debug logs.
         // Delay toast to avoid missing overlay during cold-start deeplink handling.
         Timer(Duration(seconds: 1), () {
@@ -2436,7 +2436,7 @@ List<String>? urlLinkToCmdArgs(Uri uri) {
           bind.mainGetBuildinOption(key: kOptionAllowDeepLinkPassword) == 'Y';
       if (!allowDeepLinkPassword) {
         debugPrint(
-            "Ignore rustdesk://password because $kOptionAllowDeepLinkPassword is not enabled.");
+            "Ignore veradesk://password because $kOptionAllowDeepLinkPassword is not enabled.");
         // Keep the user-facing error generic; detailed rejection reason is in debug logs.
         // Delay toast to avoid missing overlay during cold-start deeplink handling.
         Timer(Duration(seconds: 1), () {
@@ -2461,9 +2461,9 @@ List<String>? urlLinkToCmdArgs(Uri uri) {
   } else if (uri.authority.length > 2 &&
       (uri.path.length <= 1 ||
           (uri.path == '/r' || uri.path.startsWith('/r@')))) {
-    // rustdesk://<connect-id>
-    // rustdesk://<connect-id>/r
-    // rustdesk://<connect-id>/r@<server>
+    // veradesk://<connect-id>
+    // veradesk://<connect-id>/r
+    // veradesk://<connect-id>/r@<server>
     command = '--connect';
     id = uri.authority;
     if (uri.path.length > 1) {
@@ -2533,31 +2533,31 @@ connectMainDesktop(String id,
     String? connToken,
     bool? isSharedPassword}) async {
   if (isFileTransfer) {
-    await rustDeskWinManager.newFileTransfer(id,
+    await veraDeskWinManager.newFileTransfer(id,
         password: password,
         isSharedPassword: isSharedPassword,
         connToken: connToken,
         forceRelay: forceRelay);
   } else if (isViewCamera) {
-    await rustDeskWinManager.newViewCamera(id,
+    await veraDeskWinManager.newViewCamera(id,
         password: password,
         isSharedPassword: isSharedPassword,
         connToken: connToken,
         forceRelay: forceRelay);
   } else if (isTcpTunneling || isRDP) {
-    await rustDeskWinManager.newPortForward(id, isRDP,
+    await veraDeskWinManager.newPortForward(id, isRDP,
         password: password,
         isSharedPassword: isSharedPassword,
         connToken: connToken,
         forceRelay: forceRelay);
   } else if (isTerminal) {
-    await rustDeskWinManager.newTerminal(id,
+    await veraDeskWinManager.newTerminal(id,
         password: password,
         isSharedPassword: isSharedPassword,
         connToken: connToken,
         forceRelay: forceRelay);
   } else {
-    await rustDeskWinManager.newRemoteDesktop(id,
+    await veraDeskWinManager.newRemoteDesktop(id,
         password: password,
         isSharedPassword: isSharedPassword,
         forceRelay: forceRelay);
@@ -2613,7 +2613,7 @@ connect(BuildContext context, String id,
         forceRelay: forceRelay,
       );
     } else {
-      await rustDeskWinManager.call(WindowType.Main, kWindowConnect, {
+      await veraDeskWinManager.call(WindowType.Main, kWindowConnect, {
         'id': id,
         'isFileTransfer': isFileTransfer,
         'isViewCamera': isViewCamera,
@@ -2828,22 +2828,22 @@ bool isRunningInPortableMode() {
 /// Window status callback
 Future<void> onActiveWindowChanged() async {
   print(
-      "[MultiWindowHandler] active window changed: ${rustDeskWinManager.getActiveWindows()}");
-  if (rustDeskWinManager.getActiveWindows().isEmpty) {
+      "[MultiWindowHandler] active window changed: ${veraDeskWinManager.getActiveWindows()}");
+  if (veraDeskWinManager.getActiveWindows().isEmpty) {
     // close all sub windows
     try {
       if (isLinux) {
         await Future.wait([
           saveWindowPosition(WindowType.Main),
-          rustDeskWinManager.closeAllSubWindows()
+          veraDeskWinManager.closeAllSubWindows()
         ]);
       } else {
-        await rustDeskWinManager.closeAllSubWindows();
+        await veraDeskWinManager.closeAllSubWindows();
       }
     } catch (err) {
       debugPrintStack(label: "$err");
     } finally {
-      debugPrint("Start closing RustDesk...");
+      debugPrint("Start closing VeraDesk...");
       await windowManager.setPreventClose(false);
       await windowManager.close();
       if (isMacOS) {
@@ -2859,9 +2859,9 @@ Future<void> onActiveWindowChanged() async {
         //
         //```
         // embedder.cc (2725): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
-        // 2024-11-11 11:41:11.546 RustDesk[90272:2567686] Failed to create a FlutterPlatformMessageResponseHandle (2)
+        // 2024-11-11 11:41:11.546 VeraDesk[90272:2567686] Failed to create a FlutterPlatformMessageResponseHandle (2)
         // embedder.cc (2672): 'FlutterEngineSendPlatformMessage' returned 'kInvalidArguments'. Invalid engine handle.
-        // 2024-11-11 11:41:11.565 RustDesk[90272:2567686] Failed to send message to Flutter engine on channel 'flutter/lifecycle' (2).
+        // 2024-11-11 11:41:11.565 VeraDesk[90272:2567686] Failed to send message to Flutter engine on channel 'flutter/lifecycle' (2).
         // ```
         periodic_immediate(
             Duration(milliseconds: 30), RdPlatformChannel.instance.terminate);
@@ -2932,7 +2932,7 @@ class ServerConfig {
     this.key = key?.trim() ?? '';
   }
 
-  /// decode from shared string (from user shared or rustdesk-server generated)
+  /// decode from shared string (from user shared or veradesk-server generated)
   /// also see [encode]
   /// throw when decoding failure
   ServerConfig.decode(String msg) {
@@ -3060,7 +3060,7 @@ Future<void> updateSystemWindowTheme() async {
 ///
 /// Note: not found a general solution for rust based AVFoundation bingding.
 /// [AVFoundation] crate has compile error.
-const kMacOSPermChannel = MethodChannel("org.rustdesk.rustdesk/host");
+const kMacOSPermChannel = MethodChannel("org.veradesk.veradesk/host");
 
 enum PermissionAuthorizeType {
   undetermined,
@@ -3338,7 +3338,7 @@ Future<List<Rect>> getScreenListWayland() async {
       screenRectList.add(rect);
     }
   } else {
-    final screenList = await rustDeskWinManager.call(
+    final screenList = await veraDeskWinManager.call(
         WindowType.Main, kWindowGetScreenList, '');
     try {
       for (var screen in jsonDecode(screenList.result) as List<dynamic>) {
@@ -3443,7 +3443,7 @@ setNewConnectWindowFrame(int windowId, String peerId, int preSessionCount,
     WindowType windowType, int? display, Rect? screenRect) async {
   if (screenRect == null) {
     // Do not restore window position to new connection if there's a pre-session.
-    // https://github.com/rustdesk/rustdesk/discussions/8825
+    // https://github.com/rustdesk/veradesk/discussions/8825
     if (preSessionCount == 0) {
       await restoreWindowPosition(windowType,
           windowId: windowId, display: display, peerId: peerId);
@@ -3738,7 +3738,7 @@ Widget loadPowered(BuildContext context) {
     cursor: SystemMouseCursors.click,
     child: GestureDetector(
       onTap: () {
-        launchUrl(Uri.parse('https://rustdesk.com'));
+        launchUrl(Uri.parse('https://veranilsoft.com'));
       },
       child: Opacity(
           opacity: 0.5,
@@ -3864,7 +3864,7 @@ Widget _buildPresetPasswordWarning() {
           style: TextStyle(
             color: Colors.red,
             fontSize:
-                18, // https://github.com/rustdesk/rustdesk-server-pro/issues/261
+                18, // https://github.com/rustdesk/veradesk-server-pro/issues/261
             fontWeight: FontWeight.bold,
           ),
         )).paddingOnly(bottom: 8),
@@ -3978,6 +3978,29 @@ bool isChangeIdDisabled() =>
 bool isUnlockPinDisabled() =>
     bind.mainGetBuildinOption(key: kOptionDisableUnlockPin) == 'Y';
 
+/// VeraDesk: ilk açılışta kalıcı şifre belirlenmemişse, kullanıcıya bir kez
+/// "Kalıcı şifre belirle" diyaloğunu göster. Kapatılırsa bir daha sorulmaz
+/// (yerel seçenek `veradesk-permanent-password-prompted`).
+const String kOptionVeraDeskPwdPrompted = 'veradesk-permanent-password-prompted';
+
+Future<void> veraDeskPromptPermanentPasswordOnce(
+    void Function() showDialog) async {
+  if (bind.mainGetBuildinOption(key: 'prompt-permanent-password-on-first-run') !=
+      'Y') {
+    return;
+  }
+  if (bind.isOutgoingOnly()) return;
+  if (bind.mainGetLocalOption(key: kOptionVeraDeskPwdPrompted) == 'Y') return;
+  final permanentPasswordSet =
+      (await bind.mainGetCommon(key: 'permanent-password-set')) == 'true';
+  if (permanentPasswordSet) {
+    await bind.mainSetLocalOption(key: kOptionVeraDeskPwdPrompted, value: 'Y');
+    return;
+  }
+  await bind.mainSetLocalOption(key: kOptionVeraDeskPwdPrompted, value: 'Y');
+  showDialog();
+}
+
 bool? _isCustomClient;
 bool get isCustomClient {
   _isCustomClient ??= bind.isCustomClient();
@@ -3993,7 +4016,7 @@ get defaultOptionAccessMode => isCustomClient ? 'custom' : '';
 get defaultOptionApproveMode => isCustomClient ? 'password-click' : '';
 
 bool whitelistNotEmpty() {
-  // https://rustdesk.com/docs/en/self-host/client-configuration/advanced-settings/#whitelist
+  // https://veranilsoft.com/docs/en/self-host/client-configuration/advanced-settings/#whitelist
   final v = bind.mainGetOptionSync(key: kOptionWhitelist);
   return v != '' && v != ',';
 }
@@ -4011,8 +4034,8 @@ bool idWhitelistNotEmpty() {
 // When we drag the blank tab bar (not the tab), the window will be dragged normally by adding the `onPanStart` handle.
 //
 // See the following code for more details:
-// https://github.com/rustdesk/rustdesk/blob/ce1dac3b8613596b4d8ae981275f9335489eb935/flutter/lib/desktop/widgets/tabbar_widget.dart#L385
-// https://github.com/rustdesk/rustdesk/blob/ce1dac3b8613596b4d8ae981275f9335489eb935/flutter/lib/desktop/widgets/tabbar_widget.dart#L399
+// https://github.com/rustdesk/veradesk/blob/ce1dac3b8613596b4d8ae981275f9335489eb935/flutter/lib/desktop/widgets/tabbar_widget.dart#L385
+// https://github.com/rustdesk/veradesk/blob/ce1dac3b8613596b4d8ae981275f9335489eb935/flutter/lib/desktop/widgets/tabbar_widget.dart#L399
 //
 // @platforms macos
 disableWindowMovable(int? windowId) {
@@ -4215,7 +4238,7 @@ String getConnectionText(bool secure, bool direct, String streamType) {
 
 String decode_http_response(http.Response resp) {
   try {
-    // https://github.com/rustdesk/rustdesk-server-pro/discussions/758
+    // https://github.com/rustdesk/veradesk-server-pro/discussions/758
     return utf8.decode(resp.bodyBytes, allowMalformed: true);
   } catch (e) {
     debugPrint('Failed to decode response as UTF-8: $e');

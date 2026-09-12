@@ -1,15 +1,15 @@
 [package]
-name = "rustdesk"
+name = "veradesk"
 version = "1.5.0"
-authors = ["rustdesk <info@rustdesk.com>"]
+authors = ["Veranilsoft <info@veranilsoft.com>"]
 edition = "2021"
 build= "build.rs"
-description = "RustDesk Remote Desktop"
-default-run = "rustdesk"
+description = "VeraDesk Remote Desktop"
+default-run = "veradesk"
 rust-version = "1.75"
 
 [lib]
-name = "librustdesk"
+name = "libveradesk"
 crate-type = ["cdylib", "staticlib", "rlib"]
 
 [[bin]]
@@ -85,11 +85,11 @@ fon = "0.6"
 shutdown_hooks = "0.1"
 totp-rs = { version = "5.4", default-features = false, features = ["gen_secret", "otpauth"] }
 stunclient = "0.4"
-kcp-sys= { git = "https://github.com/rustdesk-org/kcp-sys", branch = "rustdesk-patches" }
+kcp-sys= { git = "https://github.com/rustdesk-org/kcp-sys", branch = "veradesk-patches" }
 reqwest = { version = "0.12", features = ["blocking", "socks", "json", "native-tls", "rustls-tls", "rustls-tls-native-roots", "gzip", "zstd"], default-features=false }
 
 [target.'cfg(not(target_os = "linux"))'.dependencies]
-# https://github.com/rustdesk/rustdesk/discussions/10197, not use cpal on linux
+# https://github.com/rustdesk/veradesk/discussions/10197, not use cpal on linux
 cpal = { git = "https://github.com/rustdesk-org/cpal", branch = "osx-screencapturekit" }
 ringbuf = "0.3"
 
@@ -103,7 +103,7 @@ ctrlc = "3.2"
 # arboard = { version = "3.4", features = ["wayland-data-control"] }
 arboard = { git = "https://github.com/rustdesk-org/arboard", features = ["wayland-data-control"] }
 clipboard-master = { git = "https://github.com/rustdesk-org/clipboard-master" }
-portable-pty = { git = "https://github.com/rustdesk-org/wezterm", branch = "rustdesk/pty_based_0.8.1", package = "portable-pty" }
+portable-pty = { git = "https://github.com/rustdesk-org/wezterm", branch = "veradesk/pty_based_0.8.1", package = "portable-pty" }
 
 system_shutdown = "4.0"
 qrcode-generator = "4.1"
@@ -235,10 +235,10 @@ webrtc-util = { git = "https://github.com/rustdesk-org/webrtc", rev = "db3b07a9d
 webrtc-sctp = { git = "https://github.com/rustdesk-org/webrtc", rev = "db3b07a9dd8f195916c89c2e62a8911402b11d27" }
 
 [package.metadata.winres]
-LegalCopyright = "Copyright © 2026 Purslane Tech Pte. Ltd. All rights reserved."
-ProductName = "RustDesk"
-FileDescription = "RustDesk Remote Desktop"
-OriginalFilename = "rustdesk.exe"
+LegalCopyright = "Copyright © 2026 Veranilsoft All rights reserved."
+ProductName = "VeraDesk"
+FileDescription = "VeraDesk Remote Desktop"
+OriginalFilename = "veradesk.exe"
 
 [target.'cfg(target_os="windows")'.build-dependencies]
 winres = "0.1"
@@ -255,8 +255,8 @@ docopt = "1.1"
 tokio = { version = "1.44", features = ["test-util"] }
 
 [package.metadata.bundle]
-name = "RustDesk"
-identifier = "com.carriez.rustdesk"
+name = "VeraDesk"
+identifier = "com.veranilsoft.veradesk"
 icon = ["res/32x32.png", "res/128x128.png", "res/128x128@2x.png"]
 osx_minimum_system_version = "10.14"
 

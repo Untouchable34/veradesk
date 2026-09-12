@@ -4,17 +4,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hbb/common.dart';
-import 'package:flutter_hbb/common/widgets/dialog.dart';
-import 'package:flutter_hbb/models/input_modifier_utils.dart';
-import 'package:flutter_hbb/models/model.dart';
-import 'package:flutter_hbb/models/platform_model.dart';
-import 'package:flutter_hbb/models/terminal_copy_shortcut.dart';
-import 'package:flutter_hbb/models/terminal_model.dart';
-import 'package:flutter_hbb/models/terminal_mouse_handler.dart';
-import 'package:flutter_hbb/mobile/terminal_keyboard_utils.dart';
-import 'package:flutter_hbb/web/dummy.dart'
-    if (dart.library.html) 'package:flutter_hbb/web/terminal_font.dart';
+import 'package:veradesk/common.dart';
+import 'package:veradesk/common/widgets/dialog.dart';
+import 'package:veradesk/models/input_modifier_utils.dart';
+import 'package:veradesk/models/model.dart';
+import 'package:veradesk/models/platform_model.dart';
+import 'package:veradesk/models/terminal_copy_shortcut.dart';
+import 'package:veradesk/models/terminal_model.dart';
+import 'package:veradesk/models/terminal_mouse_handler.dart';
+import 'package:veradesk/mobile/terminal_keyboard_utils.dart';
+import 'package:veradesk/web/dummy.dart'
+    if (dart.library.html) 'package:veradesk/web/terminal_font.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xterm/xterm.dart';
 import '../../desktop/pages/terminal_connection_manager.dart';

@@ -10,24 +10,24 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_hbb/common/widgets/peers_view.dart';
-import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/models/ab_model.dart';
-import 'package:flutter_hbb/models/chat_model.dart';
-import 'package:flutter_hbb/models/cm_file_model.dart';
-import 'package:flutter_hbb/models/file_model.dart';
-import 'package:flutter_hbb/models/group_model.dart';
-import 'package:flutter_hbb/models/peer_model.dart';
-import 'package:flutter_hbb/models/peer_tab_model.dart';
-import 'package:flutter_hbb/models/printer_model.dart';
-import 'package:flutter_hbb/models/server_model.dart';
-import 'package:flutter_hbb/models/user_model.dart';
-import 'package:flutter_hbb/models/state_model.dart';
-import 'package:flutter_hbb/models/desktop_render_texture.dart';
-import 'package:flutter_hbb/models/terminal_model.dart';
-import 'package:flutter_hbb/common/shared_state.dart';
-import 'package:flutter_hbb/utils/multi_window_manager.dart';
-import 'package:flutter_hbb/utils/http_service.dart' as http;
+import 'package:veradesk/common/widgets/peers_view.dart';
+import 'package:veradesk/consts.dart';
+import 'package:veradesk/models/ab_model.dart';
+import 'package:veradesk/models/chat_model.dart';
+import 'package:veradesk/models/cm_file_model.dart';
+import 'package:veradesk/models/file_model.dart';
+import 'package:veradesk/models/group_model.dart';
+import 'package:veradesk/models/peer_model.dart';
+import 'package:veradesk/models/peer_tab_model.dart';
+import 'package:veradesk/models/printer_model.dart';
+import 'package:veradesk/models/server_model.dart';
+import 'package:veradesk/models/user_model.dart';
+import 'package:veradesk/models/state_model.dart';
+import 'package:veradesk/models/desktop_render_texture.dart';
+import 'package:veradesk/models/terminal_model.dart';
+import 'package:veradesk/common/shared_state.dart';
+import 'package:veradesk/utils/multi_window_manager.dart';
+import 'package:veradesk/utils/http_service.dart' as http;
 import 'package:tuple/tuple.dart';
 import 'package:image/image.dart' as img2;
 import 'package:flutter_svg/flutter_svg.dart';
@@ -42,12 +42,12 @@ import '../utils/image.dart' as img;
 import '../common/widgets/dialog.dart';
 import 'input_model.dart';
 import 'platform_model.dart';
-import 'package:flutter_hbb/utils/scale.dart';
+import 'package:veradesk/utils/scale.dart';
 
-import 'package:flutter_hbb/generated_bridge.dart'
-    if (dart.library.html) 'package:flutter_hbb/web/bridge.dart';
-import 'package:flutter_hbb/native/custom_cursor.dart'
-    if (dart.library.html) 'package:flutter_hbb/web/custom_cursor.dart';
+import 'package:veradesk/generated_bridge.dart'
+    if (dart.library.html) 'package:veradesk/web/bridge.dart';
+import 'package:veradesk/native/custom_cursor.dart'
+    if (dart.library.html) 'package:veradesk/web/custom_cursor.dart';
 
 typedef HandleMsgBox = Function(Map<String, dynamic> evt, String id);
 typedef ReconnectHandle = Function(OverlayDialogManager, SessionID, bool);
@@ -755,7 +755,7 @@ class FfiModel with ChangeNotifier {
       case kUrlActionClose:
         debugPrint("closing all instances");
         Future.microtask(() async {
-          await rustDeskWinManager.closeAllSubWindows();
+          await veraDeskWinManager.closeAllSubWindows();
           windowManager.close();
         });
         break;
@@ -1016,7 +1016,7 @@ class FfiModel with ChangeNotifier {
       // The actual wait may exceed 30s (e.g., 20s elapsed + 16s next retry = 36s), which is acceptable
       // since the controlled side reconnects quickly after account changes.
       // Uses time-based check instead of _reconnects count because user can manually retry.
-      // https://github.com/rustdesk/rustdesk/discussions/14048
+      // https://github.com/rustdesk/veradesk/discussions/14048
       if (_offlineReconnectStartTime == null) {
         // First offline, record time and start retry
         _offlineReconnectStartTime = DateTime.now();
@@ -1727,7 +1727,7 @@ class FfiModel with ChangeNotifier {
     }
 
     if (updateData.isEmpty) {
-      _pi.platformAdditions.remove(kPlatformAdditionsRustDeskVirtualDisplays);
+      _pi.platformAdditions.remove(kPlatformAdditionsVeraDeskVirtualDisplays);
       _pi.platformAdditions.remove(kPlatformAdditionsAmyuniVirtualDisplays);
     } else {
       try {
@@ -1736,9 +1736,9 @@ class FfiModel with ChangeNotifier {
           _pi.platformAdditions[key] = updateJson[key];
         }
         if (!updateJson
-            .containsKey(kPlatformAdditionsRustDeskVirtualDisplays)) {
+            .containsKey(kPlatformAdditionsVeraDeskVirtualDisplays)) {
           _pi.platformAdditions
-              .remove(kPlatformAdditionsRustDeskVirtualDisplays);
+              .remove(kPlatformAdditionsVeraDeskVirtualDisplays);
         }
         if (!updateJson.containsKey(kPlatformAdditionsAmyuniVirtualDisplays)) {
           _pi.platformAdditions.remove(kPlatformAdditionsAmyuniVirtualDisplays);
@@ -1819,7 +1819,7 @@ class FfiModel with ChangeNotifier {
 
   void setViewOnly(String id, bool value) {
     if (versionCmp(_pi.version, '1.2.0') < 0) return;
-    // tmp fix for https://github.com/rustdesk/rustdesk/pull/3706#issuecomment-1481242389
+    // tmp fix for https://github.com/rustdesk/veradesk/pull/3706#issuecomment-1481242389
     // because below rx not used in mobile version, so not initialized, below code will cause crash
     // current our flutter code quality is fucking shit now. !!!!!!!!!!!!!!!!
     try {
@@ -2663,7 +2663,7 @@ class CanvasModel with ChangeNotifier {
       bumpAmount.y += bumpAmount.y.sign * 0.5;
 
       var bumpMouseSucceeded = _bumpMouseIsWorking &&
-          (await rustDeskWinManager.call(WindowType.Main, kWindowBumpMouse,
+          (await veraDeskWinManager.call(WindowType.Main, kWindowBumpMouse,
                   {"dx": bumpAmount.x.round(), "dy": bumpAmount.y.round()}))
               .result;
 
@@ -4216,8 +4216,8 @@ class PeerInfo with ChangeNotifier {
   bool get isInstalled =>
       platform != kPeerPlatformWindows ||
       platformAdditions[kPlatformAdditionsIsInstalled] == true;
-  List<int> get RustDeskVirtualDisplays => List<int>.from(
-      platformAdditions[kPlatformAdditionsRustDeskVirtualDisplays] ?? []);
+  List<int> get VeraDeskVirtualDisplays => List<int>.from(
+      platformAdditions[kPlatformAdditionsVeraDeskVirtualDisplays] ?? []);
   int get amyuniVirtualDisplayCount =>
       platformAdditions[kPlatformAdditionsAmyuniVirtualDisplays] ?? 0;
 
@@ -4227,8 +4227,8 @@ class PeerInfo with ChangeNotifier {
 
   bool get cursorEmbedded => tryGetDisplay()?.cursorEmbedded ?? false;
 
-  bool get isRustDeskIdd =>
-      platformAdditions[kPlatformAdditionsIddImpl] == 'rustdesk_idd';
+  bool get isVeraDeskIdd =>
+      platformAdditions[kPlatformAdditionsIddImpl] == 'veradesk_idd';
   bool get isAmyuniIdd =>
       platformAdditions[kPlatformAdditionsIddImpl] == 'amyuni_idd';
 

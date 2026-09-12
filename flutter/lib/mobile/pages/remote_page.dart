@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hbb/common/shared_state.dart';
-import 'package:flutter_hbb/common/widgets/toolbar.dart';
-import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/mobile/widgets/floating_mouse.dart';
-import 'package:flutter_hbb/mobile/widgets/floating_mouse_widgets.dart';
-import 'package:flutter_hbb/mobile/widgets/gesture_help.dart';
-import 'package:flutter_hbb/models/chat_model.dart';
+import 'package:veradesk/common/shared_state.dart';
+import 'package:veradesk/common/widgets/toolbar.dart';
+import 'package:veradesk/consts.dart';
+import 'package:veradesk/mobile/widgets/floating_mouse.dart';
+import 'package:veradesk/mobile/widgets/floating_mouse_widgets.dart';
+import 'package:veradesk/mobile/widgets/gesture_help.dart';
+import 'package:veradesk/models/chat_model.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -249,7 +249,7 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
 
       // Workaround for iOS: physical keyboard input fails after virtual keyboard is hidden
       // https://github.com/flutter/flutter/issues/39900
-      // https://github.com/rustdesk/rustdesk/discussions/11843#discussioncomment-13499698 - Virtual keyboard issue
+      // https://github.com/rustdesk/veradesk/discussions/11843#discussioncomment-13499698 - Virtual keyboard issue
       if (isIOS) {
         _iosKeyboardWorkaroundTimer?.cancel();
         _iosKeyboardWorkaroundTimer = Timer(Duration(milliseconds: 100), () {
@@ -451,7 +451,7 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
         return false;
       },
       child: Scaffold(
-          // workaround for https://github.com/rustdesk/rustdesk/issues/3131
+          // workaround for https://github.com/rustdesk/veradesk/issues/3131
           floatingActionButtonLocation: keyboardIsVisible
               ? FABLocation(FloatingActionButtonLocation.endFloat, 0, -35)
               : null,

@@ -51,7 +51,7 @@ pub enum GrabState {
 pub type NotifyMessageBox = fn(String, String, String, String) -> dyn Future<Output = ()>;
 
 // the executable name of the portable version
-pub const PORTABLE_APPNAME_RUNTIME_ENV_KEY: &str = "RUSTDESK_APPNAME";
+pub const PORTABLE_APPNAME_RUNTIME_ENV_KEY: &str = "VERADESK_APPNAME";
 
 pub const PLATFORM_WINDOWS: &str = "Windows";
 pub const PLATFORM_LINUX: &str = "Linux";
@@ -999,28 +999,40 @@ pub fn is_modifier(evt: &KeyEvent) -> bool {
 }
 
 pub fn check_software_update() {
-    if is_custom_client() {
-        return;
-    }
     let opt = LocalConfig::get_option(keys::OPTION_ENABLE_CHECK_UPDATE);
     if config::option2bool(keys::OPTION_ENABLE_CHECK_UPDATE, &opt) {
         std::thread::spawn(move || allow_err!(do_check_software_update()));
     }
 }
 
-// No need to check `danger_accept_invalid_cert` for now.
-// Because the url is always `https://api.rustdesk.com/version/latest`.
+// VeraDesk: sürüm kontrolü GitHub Releases API'si üzerinden yapılır
+// (`https://api.github.com/repos/<owner>/<repo>/releases/latest`). Yanıttaki
+// `tag_name` sürüm numarasıdır; güncelleme sayfası olarak
+// `https://github.com/<owner>/<repo>/releases/tag/<tag>` kullanılır, böylece
+// updater.rs'deki `tag` -> `download` dönüşümü aynen çalışır.
 #[tokio::main(flavor = "current_thread")]
 pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
-    let (request, url) =
-        hbb_common::version_check_request(hbb_common::VER_TYPE_RUSTDESK_CLIENT.to_string());
+    #[derive(serde::Deserialize, Default)]
+    struct GithubRelease {
+        #[serde(default)]
+        tag_name: String,
+    }
+    let repo = hbb_common::config::VERADESK_GITHUB_REPO;
+    let url = format!("https://api.github.com/repos/{repo}/releases/latest");
     let proxy_conf = Config::get_socks();
     let tls_url = get_url_for_tls(&url, &proxy_conf);
     let tls_type = get_cached_tls_type(tls_url);
     let is_tls_not_cached = tls_type.is_none();
     let tls_type = tls_type.unwrap_or(TlsType::Rustls);
+    let user_agent = format!("{}/{}", get_app_name(), crate::VERSION);
     let client = create_http_client_async(tls_type, false);
-    let latest_release_response = match client.post(&url).json(&request).send().await {
+    let latest_release_response = match client
+        .get(&url)
+        .header("User-Agent", &user_agent)
+        .header("Accept", "application/vnd.github+json")
+        .send()
+        .await
+    {
         Ok(resp) => {
             upsert_tls_cache(tls_url, tls_type, false);
             resp
@@ -1029,7 +1041,12 @@ pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
             if is_tls_not_cached && err.is_request() {
                 let tls_type = TlsType::NativeTls;
                 let client = create_http_client_async(tls_type, false);
-                let resp = client.post(&url).json(&request).send().await?;
+                let resp = client
+                    .get(&url)
+                    .header("User-Agent", &user_agent)
+                    .header("Accept", "application/vnd.github+json")
+                    .send()
+                    .await?;
                 upsert_tls_cache(tls_url, tls_type, false);
                 resp
             } else {
@@ -1038,9 +1055,12 @@ pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
         }
     };
     let bytes = latest_release_response.bytes().await?;
-    let resp: hbb_common::VersionCheckResponse = serde_json::from_slice(&bytes)?;
-    let response_url = resp.url;
-    let latest_release_version = response_url.rsplit('/').next().unwrap_or_default();
+    let resp: GithubRelease = serde_json::from_slice(&bytes)?;
+    let latest_release_version = resp.tag_name.trim_start_matches('v').to_owned();
+    if latest_release_version.is_empty() {
+        bail!("GitHub release response has no tag_name");
+    }
+    let response_url = format!("https://github.com/{repo}/releases/tag/{latest_release_version}");
 
     if get_version_number(&latest_release_version) > get_version_number(crate::VERSION) {
         #[cfg(feature = "flutter")]
@@ -1065,8 +1085,8 @@ pub fn get_app_name() -> String {
 }
 
 #[inline]
-pub fn is_rustdesk() -> bool {
-    hbb_common::config::APP_NAME.read().unwrap().eq("RustDesk")
+pub fn is_veradesk() -> bool {
+    hbb_common::config::APP_NAME.read().unwrap().eq("VeraDesk")
 }
 
 #[inline]
@@ -1140,7 +1160,13 @@ fn get_api_server_(api: String, custom: String) -> String {
             return format!("http://{}", s);
         }
     }
-    "https://admin.rustdesk.com".to_owned()
+    // VeraDesk: henüz ayrı bir API sunucusu yok; varsayılan olarak ID sunucusunun
+    // 21114 portu (VeraDesk API konvansiyonu) kullanılır.
+    format!(
+        "http://{}:{}",
+        config::VERADESK_RENDEZVOUS_SERVER,
+        config::RENDEZVOUS_PORT - 2
+    )
 }
 
 #[inline]
@@ -1153,7 +1179,7 @@ pub fn is_public(url: &str) -> bool {
         return false;
     };
     let host = host.strip_suffix('.').unwrap_or(host);
-    host == "rustdesk.com" || host.ends_with(".rustdesk.com")
+    host == "veranilsoft.com" || host.ends_with(".veranilsoft.com")
 }
 
 pub fn get_tcp_punch_enabled() -> bool {
@@ -2058,7 +2084,7 @@ pub fn check_process(arg: &str, mut same_uid: bool) -> bool {
         if same_uid && p.user_id() != my_uid {
             continue;
         }
-        // on mac, p.cmd() get "/Applications/RustDesk.app/Contents/MacOS/RustDesk", "XPC_SERVICE_NAME=com.carriez.RustDesk_server"
+        // on mac, p.cmd() get "/Applications/VeraDesk.app/Contents/MacOS/VeraDesk", "XPC_SERVICE_NAME=com.veranilsoft.VeraDesk_server"
         let parg = if p.cmd().len() <= 1 { "" } else { &p.cmd()[1] };
         if arg.is_empty() {
             if !parg.starts_with("--") {
@@ -2219,33 +2245,21 @@ impl ThrottledInterval {
     }
 }
 
-pub type RustDeskInterval = ThrottledInterval;
+pub type VeraDeskInterval = ThrottledInterval;
 
 #[inline]
-pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
+pub fn veradesk_interval(i: Interval) -> ThrottledInterval {
     ThrottledInterval::new(i)
 }
 
+/// VeraDesk: the client identity and default settings are compiled into the
+/// binary from `veradesk.json` (repo root) instead of a signed `custom.txt`.
+/// Keys under `default-settings` become the initial value of each option and
+/// stay user-editable; keys under `override-settings` are enforced.
+const VERADESK_EMBEDDED_CONFIG: &str = include_str!("../veradesk.json");
+
 pub fn load_custom_client() {
-    #[cfg(debug_assertions)]
-    if let Ok(data) = std::fs::read_to_string("./custom.txt") {
-        read_custom_client(data.trim());
-        return;
-    }
-    let Some(path) = std::env::current_exe().map_or(None, |x| x.parent().map(|x| x.to_path_buf()))
-    else {
-        return;
-    };
-    #[cfg(target_os = "macos")]
-    let path = path.join("../Resources");
-    let path = path.join("custom.txt");
-    if path.is_file() {
-        let Ok(data) = std::fs::read_to_string(&path) else {
-            log::error!("Failed to read custom client config");
-            return;
-        };
-        read_custom_client(&data.trim());
-    }
+    read_custom_client_json(VERADESK_EMBEDDED_CONFIG.trim());
 }
 
 fn read_custom_client_advanced_settings(
@@ -2338,8 +2352,16 @@ pub fn read_custom_client(config: &str) {
         log::error!("Failed to dec custom client config");
         return;
     };
+    match std::str::from_utf8(&data) {
+        Ok(json) => read_custom_client_json(json),
+        Err(_) => log::error!("Failed to parse custom client config"),
+    }
+}
+
+/// Apply a plain (unsigned) custom-client JSON document.
+pub fn read_custom_client_json(json: &str) {
     let Ok(mut data) =
-        serde_json::from_slice::<std::collections::HashMap<String, serde_json::Value>>(&data)
+        serde_json::from_str::<std::collections::HashMap<String, serde_json::Value>>(json)
     else {
         log::error!("Failed to parse custom client config");
         return;
@@ -2427,7 +2449,7 @@ pub fn get_builtin_option(key: &str) -> String {
 
 #[inline]
 pub fn is_custom_client() -> bool {
-    get_app_name() != "RustDesk"
+    get_app_name() != "VeraDesk"
 }
 
 pub fn verify_login(_raw: &str, _id: &str) -> bool {
@@ -2902,12 +2924,12 @@ mod tests {
     // ThrottledInterval tick at the same time as tokio interval, if no sleeps
     #[allow(non_snake_case)]
     #[tokio::test]
-    async fn test_RustDesk_interval() {
+    async fn test_VeraDesk_interval() {
         let base_intervals = [interval_maker, interval_at_maker];
         for maker in base_intervals.into_iter() {
             let mut tokio_timer = maker();
             let mut tokio_times = Vec::new();
-            let mut timer = rustdesk_interval(maker());
+            let mut timer = veradesk_interval(maker());
             let mut times = Vec::new();
             loop {
                 tokio::select! {
@@ -2951,10 +2973,10 @@ mod tests {
     // ThrottledInterval tick less times than tokio interval, if there're sleeps
     #[allow(non_snake_case)]
     #[tokio::test]
-    async fn test_RustDesk_interval_sleep() {
+    async fn test_VeraDesk_interval_sleep() {
         let base_intervals = [interval_maker, interval_at_maker];
         for (i, maker) in base_intervals.into_iter().enumerate() {
-            let mut timer = rustdesk_interval(maker());
+            let mut timer = veradesk_interval(maker());
             let mut times = Vec::new();
             sleep(Duration::from_secs(3)).await;
             loop {
@@ -3012,37 +3034,37 @@ mod tests {
 
     #[test]
     fn test_is_public() {
-        // Test URLs containing "rustdesk.com/"
-        assert!(is_public("https://rustdesk.com/"));
-        assert!(is_public("https://www.rustdesk.com/"));
-        assert!(is_public("https://api.rustdesk.com/v1"));
-        assert!(is_public("https://API.RUSTDESK.COM/v1"));
-        assert!(is_public("https://rustdesk.com/path"));
+        // Test URLs containing "veranilsoft.com/"
+        assert!(is_public("https://veranilsoft.com/"));
+        assert!(is_public("https://www.veranilsoft.com/"));
+        assert!(is_public("https://api.veranilsoft.com/v1"));
+        assert!(is_public("https://API.VERADESK.COM/v1"));
+        assert!(is_public("https://veranilsoft.com/path"));
 
-        // Test URLs ending with "rustdesk.com"
-        assert!(is_public("rustdesk.com"));
-        assert!(is_public("https://rustdesk.com"));
-        assert!(is_public("https://RustDesk.com"));
-        assert!(is_public("http://www.rustdesk.com"));
-        assert!(is_public("https://api.rustdesk.com"));
+        // Test URLs ending with "veranilsoft.com"
+        assert!(is_public("veranilsoft.com"));
+        assert!(is_public("https://veranilsoft.com"));
+        assert!(is_public("https://VeraDesk.com"));
+        assert!(is_public("http://www.veranilsoft.com"));
+        assert!(is_public("https://api.veranilsoft.com"));
 
         // Test non-public URLs
         assert!(!is_public("https://example.com"));
         assert!(!is_public("https://custom-server.com"));
         assert!(!is_public("http://192.168.1.1"));
         assert!(!is_public("localhost"));
-        assert!(!is_public("https://rustdesk.computer.com"));
-        assert!(!is_public("rustdesk.comhello.com"));
+        assert!(!is_public("https://veranilsoft.computer.com"));
+        assert!(!is_public("veranilsoft.comhello.com"));
     }
 
     #[test]
-    fn test_is_public_matches_rustdesk_root_domain() {
-        assert!(is_public("rustdesk.com/"));
-        assert!(is_public("rustdesk.com:21117"));
-        assert!(is_public("api.rustdesk.com:21117"));
-        assert!(!is_public("hello-rustdesk.com"));
-        assert!(!is_public("api.rustdesk.com.evil.test"));
-        assert!(!is_public("https://rustdesk.com@evil.test"));
+    fn test_is_public_matches_veradesk_root_domain() {
+        assert!(is_public("veranilsoft.com/"));
+        assert!(is_public("veranilsoft.com:21117"));
+        assert!(is_public("api.veranilsoft.com:21117"));
+        assert!(!is_public("hello-veranilsoft.com"));
+        assert!(!is_public("api.veranilsoft.com.evil.test"));
+        assert!(!is_public("https://veranilsoft.com@evil.test"));
     }
 
     #[test]
@@ -3060,8 +3082,8 @@ mod tests {
             "https://admin.example.com"
         ));
         assert!(!should_use_tcp_proxy_for_api_url(
-            "https://admin.rustdesk.com/api/login",
-            "https://admin.rustdesk.com"
+            "https://admin.veranilsoft.com/api/login",
+            "https://admin.veranilsoft.com"
         ));
         assert!(!should_use_tcp_proxy_for_api_url(
             "https://admin.example.com/api/login",

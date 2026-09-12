@@ -829,10 +829,10 @@ fn run(vs: VideoService) -> ResultType<()> {
                     if !is_x11() {
                         if would_block_count >= 100 {
                             // to-do: Unknown reason for WouldBlock 100 times (seconds = 100 * 1 / fps)
-                            // https://github.com/rustdesk/rustdesk/blob/63e6b2f8ab51743e77a151e2b7ff18816f5fa2fb/libs/scrap/src/common/wayland.rs#L81
+                            // https://github.com/rustdesk/veradesk/blob/63e6b2f8ab51743e77a151e2b7ff18816f5fa2fb/libs/scrap/src/common/wayland.rs#L81
                             //
                             // Do not reset the capturer for now, as it will cause the prompt to show every few minutes.
-                            // https://github.com/rustdesk/rustdesk/issues/4276
+                            // https://github.com/rustdesk/veradesk/issues/4276
                             //
                             // super::wayland::clear();
                             // bail!("Wayland capturer none 100 times, try restart capture");
@@ -1330,12 +1330,12 @@ pub fn make_display_changed_msg(
     Some(msg_out)
 }
 
-/// Per-second pipeline diagnostics, off unless `RUSTDESK_QOS_VERBOSE` is set.
+/// Per-second pipeline diagnostics, off unless `VERADESK_QOS_VERBOSE` is set.
 /// The default log level is `debug`, so an unconditional line here would land in
 /// every user's log file once a second forever.  Nothing enables it implicitly.
 pub(crate) fn qos_diag_verbose() -> bool {
     static VERBOSE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    *VERBOSE.get_or_init(|| std::env::var("RUSTDESK_QOS_VERBOSE").is_ok())
+    *VERBOSE.get_or_init(|| std::env::var("VERADESK_QOS_VERBOSE").is_ok())
 }
 
 fn check_qos(

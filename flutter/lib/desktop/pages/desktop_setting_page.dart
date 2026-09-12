@@ -5,18 +5,18 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hbb/common.dart';
-import 'package:flutter_hbb/common/widgets/audio_input.dart';
-import 'package:flutter_hbb/common/widgets/setting_widgets.dart';
-import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/desktop/pages/desktop_home_page.dart';
-import 'package:flutter_hbb/desktop/pages/desktop_tab_page.dart';
-import 'package:flutter_hbb/desktop/widgets/remote_toolbar.dart';
-import 'package:flutter_hbb/mobile/widgets/dialog.dart';
-import 'package:flutter_hbb/models/platform_model.dart';
-import 'package:flutter_hbb/models/printer_model.dart';
-import 'package:flutter_hbb/models/server_model.dart';
-import 'package:flutter_hbb/models/state_model.dart';
+import 'package:veradesk/common.dart';
+import 'package:veradesk/common/widgets/audio_input.dart';
+import 'package:veradesk/common/widgets/setting_widgets.dart';
+import 'package:veradesk/consts.dart';
+import 'package:veradesk/desktop/pages/desktop_home_page.dart';
+import 'package:veradesk/desktop/pages/desktop_tab_page.dart';
+import 'package:veradesk/desktop/widgets/remote_toolbar.dart';
+import 'package:veradesk/mobile/widgets/dialog.dart';
+import 'package:veradesk/models/platform_model.dart';
+import 'package:veradesk/models/printer_model.dart';
+import 'package:veradesk/models/server_model.dart';
+import 'package:veradesk/models/state_model.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -2459,7 +2459,7 @@ class _AboutState extends State<_About> {
       final scrollController = ScrollController();
       return SingleChildScrollView(
         controller: scrollController,
-        child: _Card(title: translate('About RustDesk'), children: [
+        child: _Card(title: translate('About VeraDesk'), children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -2481,7 +2481,7 @@ class _AboutState extends State<_About> {
                       .marginSymmetric(vertical: 4.0)),
               InkWell(
                   onTap: () {
-                    launchUrlString('https://rustdesk.com/privacy.html');
+                    launchUrlString('https://veranilsoft.com/privacy.html');
                   },
                   child: Text(
                     translate('Privacy Statement'),
@@ -2489,7 +2489,7 @@ class _AboutState extends State<_About> {
                   ).marginSymmetric(vertical: 4.0)),
               InkWell(
                   onTap: () {
-                    launchUrlString('https://rustdesk.com');
+                    launchUrlString('https://veranilsoft.com');
                   },
                   child: Text(
                     translate('Website'),
@@ -2507,7 +2507,7 @@ class _AboutState extends State<_About> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Copyright © ${DateTime.now().toString().substring(0, 4)} Purslane Tech Pte. Ltd.\n$license',
+                            'Copyright © ${DateTime.now().toString().substring(0, 4)} Veranilsoft\n$license',
                             style: const TextStyle(color: Colors.white),
                           ),
                           Text(
@@ -2689,14 +2689,14 @@ class _WaylandCardState extends State<WaylandCard> {
   final _clearShortcutsInhibitorFailedMsg = ''.obs;
   // Don't show the shortcuts permission reset button for now.
   // Users can change it manually:
-  //   "Settings" -> "Apps" -> "RustDesk" -> "Permissions" -> "Inhibit Shortcuts".
+  //   "Settings" -> "Apps" -> "VeraDesk" -> "Permissions" -> "Inhibit Shortcuts".
   // For resetting(clearing) the permission from the portal permission store, you can
-  // use (replace <desktop-id> with the RustDesk desktop file ID):
+  // use (replace <desktop-id> with the VeraDesk desktop file ID):
   //   busctl --user call org.freedesktop.impl.portal.PermissionStore \
   //   /org/freedesktop/impl/portal/PermissionStore org.freedesktop.impl.portal.PermissionStore \
   //   DeletePermission sss "gnome" "shortcuts-inhibitor" "<desktop-id>"
-  // On a native install this is typically "rustdesk.desktop"; on Flatpak it is usually
-  // the exported desktop ID derived from the Flatpak app-id (e.g. "com.rustdesk.RustDesk.desktop").
+  // On a native install this is typically "veradesk.desktop"; on Flatpak it is usually
+  // the exported desktop ID derived from the Flatpak app-id (e.g. "com.veradesk.VeraDesk.desktop").
   //
   // We may add it back in the future if needed.
   final showResetInhibitorPermission = false;

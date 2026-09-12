@@ -2,15 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hbb/common.dart';
-import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/main.dart';
+import 'package:veradesk/common.dart';
+import 'package:veradesk/consts.dart';
+import 'package:veradesk/main.dart';
 import 'package:xterm/xterm.dart';
 
 import 'input_modifier_utils.dart';
 import 'model.dart';
 import 'platform_model.dart';
-import 'rustdesk_terminal.dart';
+import 'veradesk_terminal.dart';
 import 'terminal_copy_shortcut.dart';
 import 'terminal_mouse_handler.dart';
 
@@ -106,7 +106,7 @@ class TerminalModel with ChangeNotifier {
     // - Peer Linux: canonical-mode shells accept both, but raw-mode apps
     //   (readline, prompt_toolkit, vim, TUI frameworks) expect '\r'.
     // - Peer macOS: same as Linux, raw-mode apps expect '\r'
-    //   (https://github.com/rustdesk/rustdesk/issues/14907).
+    //   (https://github.com/rustdesk/veradesk/issues/14907).
     // So on mobile / web-mobile, normalize the original lone '\n' to '\r'
     // before modifier mappings. This keeps Ctrl+J mapped to LF instead of
     // having the generated control code rewritten to CR afterward.
@@ -163,7 +163,7 @@ class TerminalModel with ChangeNotifier {
   }
 
   TerminalModel(this.parent, [this.terminalId = 0]) : id = parent.id {
-    terminal = RustDeskTerminal(
+    terminal = VeraDeskTerminal(
       maxLines: 10000,
       onClipboardWrite: writeTerminalClipboard,
       clipboardWritePermission: () => terminalClipboardWritePermission(

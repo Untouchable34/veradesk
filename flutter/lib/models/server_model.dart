@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/main.dart';
-import 'package:flutter_hbb/mobile/pages/settings_page.dart';
-import 'package:flutter_hbb/models/chat_model.dart';
-import 'package:flutter_hbb/models/platform_model.dart';
+import 'package:veradesk/consts.dart';
+import 'package:veradesk/main.dart';
+import 'package:veradesk/mobile/pages/settings_page.dart';
+import 'package:veradesk/models/chat_model.dart';
+import 'package:veradesk/models/platform_model.dart';
 import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 

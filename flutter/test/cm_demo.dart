@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hbb/common.dart';
-import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/desktop/pages/server_page.dart';
-import 'package:flutter_hbb/desktop/widgets/tabbar_widget.dart';
-import 'package:flutter_hbb/main.dart';
-import 'package:flutter_hbb/models/server_model.dart';
+import 'package:veradesk/common.dart';
+import 'package:veradesk/consts.dart';
+import 'package:veradesk/desktop/pages/server_page.dart';
+import 'package:veradesk/desktop/widgets/tabbar_widget.dart';
+import 'package:veradesk/main.dart';
+import 'package:veradesk/models/server_model.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';

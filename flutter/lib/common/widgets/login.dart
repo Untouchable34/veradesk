@@ -3,9 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hbb/common/hbbs/hbbs.dart';
-import 'package:flutter_hbb/models/platform_model.dart';
-import 'package:flutter_hbb/models/user_model.dart';
+import 'package:veradesk/common/hbbs/hbbs.dart';
+import 'package:veradesk/models/platform_model.dart';
+import 'package:veradesk/models/user_model.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -120,7 +120,7 @@ class ButtonOP extends StatelessWidget {
               backgroundColor: primaryColor,
             ).copyWith(elevation: ButtonStyleButton.allOrNull(0.0)),
             onPressed:
-                curOP.value == 'rustdesk' || !canStartAuth() ? null : onTap,
+                curOP.value == 'veradesk' || !canStartAuth() ? null : onTap,
             child: Row(
               children: [
                 SizedBox(
@@ -235,7 +235,7 @@ class _OidcAuthController {
       return;
     }
     final hasActiveOidcAuth =
-        curOP.value.isNotEmpty && curOP.value != 'rustdesk';
+        curOP.value.isNotEmpty && curOP.value != 'veradesk';
     _closed = true;
     _authAttempt++;
     curOP.value = '';
@@ -836,7 +836,7 @@ Future<bool?> _openLoginDialog() async {
         setState(() => passwordMsg = translate('Password missed'));
         return;
       }
-      curOP.value = 'rustdesk';
+      curOP.value = 'veradesk';
       setState(() => isInProgress = true);
       try {
         final resp = await gFFI.userModel.login(LoginRequest(

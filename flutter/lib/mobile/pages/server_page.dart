@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hbb/desktop/pages/desktop_home_page.dart';
-import 'package:flutter_hbb/mobile/widgets/dialog.dart';
-import 'package:flutter_hbb/models/chat_model.dart';
+import 'package:veradesk/desktop/pages/desktop_home_page.dart';
+import 'package:veradesk/mobile/widgets/dialog.dart';
+import 'package:veradesk/models/chat_model.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -189,6 +189,10 @@ class _ServerPageState extends State<ServerPage> {
       await gFFI.serverModel.fetchID();
     });
     gFFI.serverModel.checkAndroidPermission();
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      veraDeskPromptPermanentPasswordOnce(() => setPasswordDialog());
+    });
   }
 
   @override

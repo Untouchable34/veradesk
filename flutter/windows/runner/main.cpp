@@ -11,10 +11,10 @@
 #include "flutter_window.h"
 #include "utils.h"
 
-typedef char** (*FUNC_RUSTDESK_CORE_MAIN)(int*);
-typedef void (*FUNC_RUSTDESK_FREE_ARGS)( char**, int);
-typedef int (*FUNC_RUSTDESK_GET_APP_NAME)(wchar_t*, int);
-typedef int (*FUNC_RUSTDESK_IS_DISABLE_INSTALLATION)();
+typedef char** (*FUNC_VERADESK_CORE_MAIN)(int*);
+typedef void (*FUNC_VERADESK_FREE_ARGS)( char**, int);
+typedef int (*FUNC_VERADESK_GET_APP_NAME)(wchar_t*, int);
+typedef int (*FUNC_VERADESK_IS_DISABLE_INSTALLATION)();
 /// Note: `--server`, `--service` are already handled in [core_main.rs].
 const std::vector<std::string> parameters_white_list = {"--install", "--cm"};
 
@@ -23,21 +23,21 @@ const wchar_t* getWindowClassName();
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command)
 {
-  HINSTANCE hInstance = LoadLibraryA("librustdesk.dll");
+  HINSTANCE hInstance = LoadLibraryA("libveradesk.dll");
   if (!hInstance)
   {
-    std::cout << "Failed to load librustdesk.dll." << std::endl;
+    std::cout << "Failed to load libveradesk.dll." << std::endl;
     return EXIT_FAILURE;
   }
-  FUNC_RUSTDESK_CORE_MAIN rustdesk_core_main =
-      (FUNC_RUSTDESK_CORE_MAIN)GetProcAddress(hInstance, "rustdesk_core_main_args");
-  if (!rustdesk_core_main)
+  FUNC_VERADESK_CORE_MAIN veradesk_core_main =
+      (FUNC_VERADESK_CORE_MAIN)GetProcAddress(hInstance, "veradesk_core_main_args");
+  if (!veradesk_core_main)
   {
-    std::cout << "Failed to get rustdesk_core_main." << std::endl;
+    std::cout << "Failed to get veradesk_core_main." << std::endl;
     return EXIT_FAILURE;
   }
-  FUNC_RUSTDESK_FREE_ARGS free_c_args =
-      (FUNC_RUSTDESK_FREE_ARGS)GetProcAddress(hInstance, "free_c_args");
+  FUNC_VERADESK_FREE_ARGS free_c_args =
+      (FUNC_VERADESK_FREE_ARGS)GetProcAddress(hInstance, "free_c_args");
   if (!free_c_args)
   {
     std::cout << "Failed to get free_c_args." << std::endl;
@@ -51,27 +51,27 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   }
 
   int args_len = 0;
-  char** c_args = rustdesk_core_main(&args_len);
+  char** c_args = veradesk_core_main(&args_len);
   if (!c_args)
   {
     std::string args_str = "";
     for (const auto& argument : command_line_arguments) {
       args_str += (argument + " ");
     }
-    // std::cout << "RustDesk [" << args_str << "], core returns false, exiting without launching Flutter app." << std::endl;
+    // std::cout << "VeraDesk [" << args_str << "], core returns false, exiting without launching Flutter app." << std::endl;
     return EXIT_SUCCESS;
   }
   std::vector<std::string> rust_args(c_args, c_args + args_len);
   free_c_args(c_args, args_len);
-  FUNC_RUSTDESK_IS_DISABLE_INSTALLATION rustdesk_is_disable_installation =
-      (FUNC_RUSTDESK_IS_DISABLE_INSTALLATION)GetProcAddress(hInstance, "rustdesk_is_disable_installation");
+  FUNC_VERADESK_IS_DISABLE_INSTALLATION veradesk_is_disable_installation =
+      (FUNC_VERADESK_IS_DISABLE_INSTALLATION)GetProcAddress(hInstance, "veradesk_is_disable_installation");
   bool is_disable_installation =
-      rustdesk_is_disable_installation && rustdesk_is_disable_installation() != 0;
+      veradesk_is_disable_installation && veradesk_is_disable_installation() != 0;
   const auto installParam = std::string("--install");
   // Flutter reads the original process command line, not only rust_args, so
   // remove the `--install` injected by the portable wrapper here as well. This
   // also lets `no-install.exe` continue as a portable app when installation is
-  // disabled. See: https://github.com/rustdesk/rustdesk-server-pro/issues/991#issuecomment-4978376890
+  // disabled. See: https://github.com/rustdesk/veradesk-server-pro/issues/991#issuecomment-4978376890
   if (is_disable_installation) {
     command_line_arguments.erase(
         std::remove(command_line_arguments.begin(),
@@ -80,11 +80,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
         command_line_arguments.end());
   }
 
-  std::wstring app_name = L"RustDesk";
-  FUNC_RUSTDESK_GET_APP_NAME get_rustdesk_app_name = (FUNC_RUSTDESK_GET_APP_NAME)GetProcAddress(hInstance, "get_rustdesk_app_name");
-  if (get_rustdesk_app_name) {
+  std::wstring app_name = L"VeraDesk";
+  FUNC_VERADESK_GET_APP_NAME get_veradesk_app_name = (FUNC_VERADESK_GET_APP_NAME)GetProcAddress(hInstance, "get_veradesk_app_name");
+  if (get_veradesk_app_name) {
     wchar_t app_name_buffer[512] = {0};
-    if (get_rustdesk_app_name(app_name_buffer, 512) == 0) {
+    if (get_veradesk_app_name(app_name_buffer, 512) == 0) {
       app_name = std::wstring(app_name_buffer);
     }
   }
