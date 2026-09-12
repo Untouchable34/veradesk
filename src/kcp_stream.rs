@@ -30,7 +30,7 @@ impl KcpStream {
     // Opt in to KCP's built-in congestion window (nc=0) instead of the pure turbo profile
     // (nc=1) that has always shipped; see `get_kcp_cc_enabled` for why this is not the default.
     // Sender-side only, so no wire negotiation is needed and either peer may run either profile.
-    // Requires kcp-sys from the `veradesk-patches` branch, which wires the config factory into
+    // Requires kcp-sys from the `rustdesk-patches` branch, which wires the config factory into
     // connection setup (on older revs the factory was stored but never consulted).
     fn apply_kcp_config(endpoint: &mut KcpEndpoint) {
         if crate::get_kcp_cc_enabled() {

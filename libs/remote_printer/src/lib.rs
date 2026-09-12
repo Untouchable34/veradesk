@@ -7,7 +7,11 @@ pub use setup::{
 };
 
 #[cfg(target_os = "windows")]
-const RD_DRIVER_INF_PATH: &str = "drivers/VeraDeskPrinterDriver/VeraDeskPrinterDriver.inf";
+// The Windows printer driver is a signed third-party package downloaded at
+// build time; its INF/catalog names cannot be changed without breaking the
+// signature, so these two identifiers keep the upstream driver's own names.
+// The printer shown to the user is still "<app name> Printer".
+const RD_DRIVER_INF_PATH: &str = "drivers/RustDeskPrinterDriver/RustDeskPrinterDriver.inf";
 
 #[cfg(target_os = "windows")]
 fn get_printer_name(app_name: &str) -> Vec<u16> {
@@ -19,7 +23,7 @@ fn get_printer_name(app_name: &str) -> Vec<u16> {
 
 #[cfg(target_os = "windows")]
 fn get_driver_name() -> Vec<u16> {
-    "VeraDesk v4 Printer Driver"
+    "RustDesk v4 Printer Driver"
         .encode_utf16()
         .chain(Some(0))
         .collect()

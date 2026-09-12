@@ -1,6 +1,6 @@
 # VeraDesk
 
-VeraDesk, [VeraDesk](https://github.com/rustdesk/veradesk) (AGPL-3.0) tabanlı, Veranilsoft
+VeraDesk, [VeraDesk](https://github.com/rustdesk/rustdesk) (AGPL-3.0) tabanlı, Veranilsoft
 tarafından markalanmış ve kendi ID/relay sunucusuna sabitlenmiş bir uzak masaüstü istemcisidir.
 Hedef platformlar: Windows, macOS, Android.
 

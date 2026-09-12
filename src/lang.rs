@@ -240,7 +240,7 @@ pub fn translate_locale(name: String, locale: &str) -> String {
                 if !app_name.contains("VeraDesk") {
                     s = s.replace("VeraDesk", &app_name);
                 } else {
-                    // https://github.com/rustdesk/veradesk-server-pro/issues/845
+                    // https://github.com/rustdesk/rustdesk-server-pro/issues/845
                     // If app_name contains "VeraDesk" (e.g., "VeraDesk-Admin"), we need to avoid
                     // replacing "VeraDesk" within the already-substituted app_name, which would
                     // cause duplication like "VeraDesk-Admin" -> "VeraDesk-Admin-Admin".

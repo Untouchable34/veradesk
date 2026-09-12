@@ -13,7 +13,7 @@ use std::process::Command;
 // No idea why the audit logs happen.
 // Though the audit logs may disappear after rebooting.
 //
-// See https://github.com/rustdesk/veradesk/discussions/11959
+// See https://github.com/rustdesk/rustdesk/discussions/11959
 //
 // `ausearch -x /usr/share/veradesk/veradesk` will return
 // ...

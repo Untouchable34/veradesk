@@ -467,7 +467,7 @@ pub(super) async fn check_init() -> ResultType<()> {
         if CAP_DISPLAY_INFO.read().unwrap().is_empty() {
             if crate::input_service::wayland_use_uinput() {
                 // The cached layout may predate compositor changes made while no session
-                // was active, https://github.com/rustdesk/veradesk/issues/15601
+                // was active, https://github.com/rustdesk/rustdesk/issues/15601
                 scrap::wayland::display::clear_wayland_displays_cache();
                 if let Some((minx, maxx, miny, maxy)) =
                     scrap::wayland::display::get_desktop_rect_for_uinput()

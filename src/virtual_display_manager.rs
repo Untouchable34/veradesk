@@ -2,7 +2,7 @@ use base::platform::windows::is_windows_version_or_greater;
 use hbb_common::{bail, ResultType};
 
 // This string is defined here.
-//  https://github.com/rustdesk-org/VeraDeskIddDriver/blob/b370aad3f50028b039aad211df60c8051c4a64d6/VeraDeskIddDriver/VeraDeskIddDriver.inf#LL73C1-L73C40
+//  https://github.com/rustdesk-org/RustDeskIddDriver/blob/b370aad3f50028b039aad211df60c8051c4a64d6/VeraDeskIddDriver/VeraDeskIddDriver.inf#LL73C1-L73C40
 pub const VERADESK_IDD_DEVICE_STRING: &'static str = "VeraDeskIddDriver Device\0";
 pub const AMYUNI_IDD_DEVICE_STRING: &'static str = "USB Mobile Monitor Virtual Display\0";
 

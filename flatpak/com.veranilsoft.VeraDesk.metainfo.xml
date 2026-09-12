@@ -39,13 +39,13 @@
     <color type="primary" scheme_preference="dark">#0160ee</color>
   </branding>
   <url type="homepage">https://veranilsoft.com</url>
-  <url type="bugtracker">https://github.com/rustdesk/veradesk/issues</url>
-  <url type="faq">https://github.com/rustdesk/veradesk/wiki/FAQ</url>
+  <url type="bugtracker">https://github.com/rustdesk/rustdesk/issues</url>
+  <url type="faq">https://github.com/rustdesk/rustdesk/wiki/FAQ</url>
   <url type="help">https://veranilsoft.com/docs</url>
   <url type="donation">https://ko-fi.com/veradesk</url>
-  <url type="vcs-browser">https://github.com/rustdesk/veradesk</url>
-  <url type="translate">https://github.com/rustdesk/veradesk/tree/master/src/lang</url>
-  <url type="contribute">https://github.com/rustdesk/veradesk/blob/master/docs/CONTRIBUTING.md</url>
+  <url type="vcs-browser">https://github.com/rustdesk/rustdesk</url>
+  <url type="translate">https://github.com/rustdesk/rustdesk/tree/master/src/lang</url>
+  <url type="contribute">https://github.com/rustdesk/rustdesk/blob/master/docs/CONTRIBUTING.md</url>
   <url type="contact">https://veranilsoft.com/docs/en/technical-support</url>
   <requires>
     <display_length compare="ge">600</display_length>

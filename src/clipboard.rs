@@ -361,8 +361,8 @@ impl ClipboardContext {
         //
         // This is a common case on Windows, so we retry here.
         // Related issues:
-        // https://github.com/rustdesk/veradesk/issues/9263
-        // https://github.com/rustdesk/veradesk/issues/9222#issuecomment-2329233175
+        // https://github.com/rustdesk/rustdesk/issues/9263
+        // https://github.com/rustdesk/rustdesk/issues/9222#issuecomment-2329233175
         for i in 0..CLIPBOARD_GET_MAX_RETRY {
             match self.inner.get_formats(formats) {
                 Ok(data) => {

@@ -10,7 +10,7 @@ use hbb_common::protobuf::MessageField;
 use scrap::Display;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-// https://github.com/rustdesk/veradesk/discussions/6042, avoiding dbus call
+// https://github.com/rustdesk/rustdesk/discussions/6042, avoiding dbus call
 
 pub const NAME: &'static str = "display";
 
@@ -47,7 +47,7 @@ struct WaylandUinputRect {
 // Per-display layout used to correct injected coordinates when the compositor moves a
 // monitor mid-session. The client keeps sending coordinates offset by the layout it was
 // told at session init (`baseline`); we remap them onto the current layout (`live`).
-// https://github.com/rustdesk/veradesk/issues/15601
+// https://github.com/rustdesk/rustdesk/issues/15601
 #[cfg(target_os = "linux")]
 #[derive(Default)]
 struct WaylandLayout {
@@ -185,7 +185,7 @@ pub(super) fn remap_wayland_uinput_coord(x: i32, y: i32) -> (i32, i32) {
 // The uinput absolute range is set when the session inits. If the compositor layout
 // changes afterwards (monitor scale/position change, or a portal virtual output
 // appearing once the capture starts), injected coordinates get rescaled by the stale
-// range and land offset, https://github.com/rustdesk/veradesk/issues/15601
+// range and land offset, https://github.com/rustdesk/rustdesk/issues/15601
 #[cfg(target_os = "linux")]
 fn refresh_wayland_uinput_rect_if_changed() {
     if is_x11() || !crate::input_service::wayland_use_uinput() {
@@ -305,7 +305,7 @@ fn refresh_wayland_uinput_rect_if_changed() {
     WAYLAND_LAYOUT_DRIFTED.store(drifted && range_ok, Ordering::Relaxed);
 }
 
-// https://github.com/rustdesk/veradesk/pull/8537
+// https://github.com/rustdesk/rustdesk/pull/8537
 static TEMP_IGNORE_DISPLAYS_CHANGED: AtomicBool = AtomicBool::new(false);
 
 #[derive(Default)]
@@ -501,7 +501,7 @@ pub fn check_displays_changed() -> ResultType<()> {
     #[cfg(target_os = "linux")]
     {
         // Currently, wayland need to call wayland::clear() before call Display::all(), otherwise it will cause
-        // block, or even crash here, https://github.com/rustdesk/veradesk/blob/0bb4d43e9ea9d9dfb9c46c8d27d1a97cd0ad6bea/libs/scrap/src/wayland/pipewire.rs#L235
+        // block, or even crash here, https://github.com/rustdesk/rustdesk/blob/0bb4d43e9ea9d9dfb9c46c8d27d1a97cd0ad6bea/libs/scrap/src/wayland/pipewire.rs#L235
         if !is_x11() {
             return Ok(());
         }

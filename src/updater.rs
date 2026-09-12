@@ -665,7 +665,7 @@ mod tests {
     #[test]
     fn update_download_file_accepts_expected_github_asset_urls() {
         let file = get_download_file_from_url(
-            "https://github.com/rustdesk/veradesk/releases/download/1.4.0/veradesk-1.4.0-x86_64.dmg",
+            "https://github.com/rustdesk/rustdesk/releases/download/1.4.0/veradesk-1.4.0-x86_64.dmg",
         )
         .expect("valid GitHub release asset URL");
 
@@ -678,16 +678,16 @@ mod tests {
     #[test]
     fn update_download_file_rejects_untrusted_or_malformed_urls() {
         for url in [
-            "http://github.com/rustdesk/veradesk/releases/download/1/veradesk.exe",
+            "http://github.com/rustdesk/rustdesk/releases/download/1/veradesk.exe",
             "https://example.com/veradesk.exe",
             "https://github.com/other/project/releases/download/1/veradesk.exe",
-            "https://github.com/rustdesk/veradesk/releases/download/1/",
-            "https://github.com/rustdesk/veradesk/releases/download/1/nested/veradesk.exe",
-            "https://github.com/rustdesk/veradesk/releases/download/1/C:veradesk.exe",
-            "https://user@github.com/rustdesk/veradesk/releases/download/1/veradesk.exe",
+            "https://github.com/rustdesk/rustdesk/releases/download/1/",
+            "https://github.com/rustdesk/rustdesk/releases/download/1/nested/veradesk.exe",
+            "https://github.com/rustdesk/rustdesk/releases/download/1/C:veradesk.exe",
+            "https://user@github.com/rustdesk/rustdesk/releases/download/1/veradesk.exe",
             "https://github.com:443/veradesk/veradesk/releases/download/1/veradesk.exe",
-            "https://github.com/rustdesk/veradesk/releases/download/1/veradesk.exe?download=1",
-            "https://github.com/rustdesk/veradesk/releases/download/1/veradesk.exe#download",
+            "https://github.com/rustdesk/rustdesk/releases/download/1/veradesk.exe?download=1",
+            "https://github.com/rustdesk/rustdesk/releases/download/1/veradesk.exe#download",
             "not a url",
         ] {
             assert!(get_download_file_from_url(url).is_none(), "{url}");
