@@ -61,3 +61,5 @@ flutter/web/
 
 # local packaging output
 *.dmg
+*.apk
+flutter/android/build/

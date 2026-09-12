@@ -65,3 +65,24 @@ python3 build.py --flutter --hwcodec --unix-file-copy-paste --screencapturekit
 Çıktı: `flutter/build/macos/Build/Products/Release/VeraDesk.app`. DMG için `res/osx-dist.sh`
 veya CI iş akışındaki `create-dmg` komutu. İlk yerel derleme bu makinede 2026-09-12'de
 başarıyla alındı (Apple Silicon, ad-hoc imza).
+
+### Android (yerel, Apple Silicon)
+
+```
+rustup target add aarch64-linux-android
+cargo install cargo-ndk --version 3.1.2 --locked
+export ANDROID_NDK_HOME=$HOME/development/android/ndk/28.2.13676358 VCPKG_ROOT=$HOME/vcpkg
+./flutter/build_android_deps.sh arm64-v8a
+export LIBCLANG_PATH=/opt/homebrew/opt/llvm/lib
+export BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android="--sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
+./flutter/ndk_arm64.sh          # bin hedefleri link hatası verir, liblibveradesk.so yeterli
+mkdir -p flutter/android/app/src/main/jniLibs/arm64-v8a
+cp target/aarch64-linux-android/release/liblibveradesk.so flutter/android/app/src/main/jniLibs/arm64-v8a/libveradesk.so
+cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so flutter/android/app/src/main/jniLibs/arm64-v8a/
+export JAVA_HOME=$HOME/development/jdk17/Contents/Home ANDROID_HOME=$HOME/development/android
+(cd flutter && flutter build apk --release --target-platform android-arm64 --split-per-abi)
+```
+
+Gradle `cargo`yu çağırdığı için `~/.cargo/bin` PATH'te olmalı. Release imzası
+`flutter/android/key.properties` (git dışı) → `~/Desktop/remote/keys/veradesk-release.jks`.
+
