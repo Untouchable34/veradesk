@@ -50,6 +50,18 @@ Yerel macOS derlemesi için: Rust 1.81, Flutter 3.24.5 (+ `.github/patches` yama
 (`VCPKG_COMMIT_ID`), `brew install nasm cmake ninja pkg-config llvm create-dmg`.
 
 ```
+brew install nasm cmake ninja pkg-config llvm create-dmg cocoapods
+softwareupdate --install-rosetta --agree-to-license   # Flutter 3.24.5 gen_snapshot x86_64
+rustup component add rustfmt
+cargo install cargo-expand --version 1.0.95 --locked
+cargo install flutter_rust_bridge_codegen --version 1.80.1 --features uuid --locked
 export VCPKG_ROOT=$HOME/vcpkg
-python3 build.py --flutter
+$VCPKG_ROOT/vcpkg install --triplet arm64-osx --x-install-root=$VCPKG_ROOT/installed
+flutter_rust_bridge_codegen --rust-input ./src/flutter_ffi.rs --dart-output ./flutter/lib/generated_bridge.dart --c-output ./flutter/macos/Runner/bridge_generated.h --llvm-path /opt/homebrew/opt/llvm
+(cd flutter && flutter pub get && dart run build_runner build --delete-conflicting-outputs)
+python3 build.py --flutter --hwcodec --unix-file-copy-paste --screencapturekit
 ```
+
+Çıktı: `flutter/build/macos/Build/Products/Release/VeraDesk.app`. DMG için `res/osx-dist.sh`
+veya CI iş akışındaki `create-dmg` komutu. İlk yerel derleme bu makinede 2026-09-12'de
+başarıyla alındı (Apple Silicon, ad-hoc imza).
