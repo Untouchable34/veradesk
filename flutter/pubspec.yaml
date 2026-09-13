@@ -159,6 +159,12 @@ flutter:
     - assets/
 
   fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-Variable.ttf
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Variable.ttf
     - family: GestureIcons
       fonts:
         - asset: assets/gestures.ttf

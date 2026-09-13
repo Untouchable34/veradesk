@@ -8,6 +8,7 @@ import 'package:veradesk/common/widgets/my_group.dart';
 import 'package:veradesk/common/widgets/peers_view.dart';
 import 'package:veradesk/common/widgets/peer_card.dart';
 import 'package:veradesk/consts.dart';
+import 'package:veradesk/vera_theme.dart';
 import 'package:veradesk/desktop/widgets/popup_menu.dart';
 import 'package:veradesk/desktop/widgets/material_mod_popup_menu.dart'
     as mod_menu;
@@ -110,7 +111,7 @@ class _PeerTabPageState extends State<PeerTabPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Obx(() => SizedBox(
-              height: 32,
+              height: 36,
               child: Container(
                 padding: stateGlobal.isPortrait.isTrue
                     ? EdgeInsets.symmetric(horizontal: 2)
@@ -136,6 +137,7 @@ class _PeerTabPageState extends State<PeerTabPage>
 
   Widget _createSwitchBar(BuildContext context) {
     final model = Provider.of<PeerTabModel>(context);
+    final c = VeraTheme.of(context);
     var counter = -1;
     return ReorderableListView(
         buildDefaultDragHandles: false,
@@ -144,18 +146,7 @@ class _PeerTabPageState extends State<PeerTabPage>
         physics: NeverScrollableScrollPhysics(),
         children: model.visibleEnabledOrderedIndexs.map((t) {
           final selected = model.currentTab == t;
-          final color = selected
-              ? MyTheme.tabbar(context).selectedTextColor
-              : MyTheme.tabbar(context).unSelectedTextColor
-            ?..withOpacity(0.5);
           final hover = false.obs;
-          final deco = BoxDecoration(
-              color: Theme.of(context).colorScheme.background,
-              borderRadius: BorderRadius.circular(6));
-          final decoBorder = BoxDecoration(
-              border: Border(
-            bottom: BorderSide(width: 2, color: color!),
-          ));
           counter += 1;
           return ReorderableDragStartListener(
               key: ValueKey(t),
@@ -166,12 +157,38 @@ class _PeerTabPageState extends State<PeerTabPage>
                     onTriggered: isMobile ? mobileShowTabVisibilityMenu : null,
                     child: InkWell(
                       child: Container(
-                        decoration: (hover.value
-                            ? (selected ? decoBorder : deco)
-                            : (selected ? decoBorder : null)),
-                        child: Icon(model.tabIcon(t), color: color)
-                            .paddingSymmetric(horizontal: 4),
-                      ).paddingSymmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 9),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              width: 2,
+                              color: selected ? c.accent : Colors.transparent,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isMobile)
+                              Icon(model.tabIcon(t),
+                                      size: 16,
+                                      color: selected ? c.text : c.muted)
+                                  .marginOnly(right: 4),
+                            Text(
+                              model.tabTooltip(t),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: selected
+                                    ? c.text
+                                    : (hover.value
+                                        ? c.text.withOpacity(0.8)
+                                        : c.muted),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       onTap: isOptionFixed(kOptionPeerTabIndex)
                           ? null
                           : () async {
@@ -681,7 +698,8 @@ class _PeerSearchBarState extends State<PeerSearchBar> {
             },
             child: Icon(
               Icons.search_rounded,
-              color: Theme.of(context).hintColor,
+              size: 18,
+              color: VeraTheme.of(context).muted,
             ));
   }
 
@@ -694,11 +712,15 @@ class _PeerSearchBarState extends State<PeerSearchBar> {
           baseOffset: 0,
           extentOffset: peerSearchTextController.value.text.length);
     });
+    final c = VeraTheme.of(context);
     return Obx(() => Container(
-          width: stateGlobal.isPortrait.isTrue ? 120 : 140,
+          width: stateGlobal.isPortrait.isTrue ? 120 : 170,
+          height: 34,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background,
-            borderRadius: BorderRadius.circular(6),
+            color: c.bg,
+            border: Border.all(
+                color: focused.value ? c.accent : c.border, width: 1),
+            borderRadius: BorderRadius.circular(VeraTheme.radiusSmall),
           ),
           child: Row(
             children: [
@@ -707,8 +729,9 @@ class _PeerSearchBarState extends State<PeerSearchBar> {
                   children: [
                     Icon(
                       Icons.search_rounded,
-                      color: Theme.of(context).hintColor,
-                    ).marginSymmetric(horizontal: 4),
+                      size: 16,
+                      color: c.muted,
+                    ).marginSymmetric(horizontal: 6),
                     Expanded(
                       child: TextField(
                         autofocus: true,
@@ -724,16 +747,15 @@ class _PeerSearchBarState extends State<PeerSearchBar> {
                             .titleLarge
                             ?.color
                             ?.withOpacity(0.5),
-                        cursorHeight: 18,
+                        cursorHeight: 16,
                         cursorWidth: 1,
-                        style: const TextStyle(fontSize: 14),
+                        style: TextStyle(fontSize: 12, color: c.text),
                         decoration: InputDecoration(
                           contentPadding:
-                              const EdgeInsets.symmetric(vertical: 6),
+                              const EdgeInsets.symmetric(vertical: 8),
                           hintText:
                               focused.value ? null : translate("Search ID"),
-                          hintStyle: TextStyle(
-                              fontSize: 14, color: Theme.of(context).hintColor),
+                          hintStyle: TextStyle(fontSize: 12, color: c.muted),
                           border: InputBorder.none,
                           isDense: true,
                         ),
@@ -754,7 +776,8 @@ class _PeerSearchBarState extends State<PeerSearchBar> {
                           message: translate('Close'),
                           child: Icon(
                             Icons.close,
-                            color: Theme.of(context).hintColor,
+                            size: 16,
+                            color: c.muted,
                           )),
                     ),
                   ],
@@ -1007,22 +1030,31 @@ Widget _hoverAction(
     RxBool? hoverableWhenfalse,
     EdgeInsetsGeometry padding = const EdgeInsets.all(4.0)}) {
   final hover = false.obs;
+  final c = VeraTheme.of(context);
   final deco = BoxDecoration(
-    color: Theme.of(context).colorScheme.background,
-    borderRadius: BorderRadius.circular(6),
+    color: c.panel,
+    borderRadius: BorderRadius.circular(VeraTheme.radiusSmall),
   );
   return Tooltip(
     message: toolTip,
     child: Obx(
       () => Container(
           margin: EdgeInsets.symmetric(horizontal: 1),
+          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
           decoration:
               (hover.value || hoverableWhenfalse?.value == false) ? deco : null,
           child: InkWell(
+              borderRadius: BorderRadius.circular(VeraTheme.radiusSmall),
               onHover: (value) => hover.value = value,
               onTap: onTap,
               onTapDown: onTapDown,
-              child: Container(padding: padding, child: child))),
+              child: Container(
+                  padding: padding,
+                  child: IconTheme(
+                      data: IconThemeData(
+                          size: 18,
+                          color: hover.value ? c.text : c.muted),
+                      child: child)))),
     ),
   );
 }

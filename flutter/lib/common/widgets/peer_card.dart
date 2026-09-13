@@ -5,6 +5,7 @@ import 'package:veradesk/common/widgets/dialog.dart';
 import 'package:veradesk/consts.dart';
 import 'package:veradesk/models/peer_tab_model.dart';
 import 'package:veradesk/models/state_model.dart';
+import 'package:veradesk/vera_theme.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -93,36 +94,33 @@ class _PeerCardState extends State<_PeerCard>
 
   Widget _buildLandscape() {
     final peer = super.widget.peer;
+    final hover = false.obs;
     var deco = Rx<BoxDecoration?>(
       BoxDecoration(
         border: Border.all(color: Colors.transparent, width: _borderWidth),
-        borderRadius: BorderRadius.circular(
-          peerCardUiType.value == PeerUiType.grid ? _cardRadius : _tileRadius,
-        ),
+        borderRadius: BorderRadius.circular(_tileRadius),
       ),
     );
     return MouseRegion(
       onEnter: (evt) {
+        hover.value = true;
         deco.value = BoxDecoration(
           border: Border.all(
               color: Theme.of(context).colorScheme.primary,
               width: _borderWidth),
-          borderRadius: BorderRadius.circular(
-            peerCardUiType.value == PeerUiType.grid ? _cardRadius : _tileRadius,
-          ),
+          borderRadius: BorderRadius.circular(_tileRadius),
         );
       },
       onExit: (evt) {
+        hover.value = false;
         deco.value = BoxDecoration(
           border: Border.all(color: Colors.transparent, width: _borderWidth),
-          borderRadius: BorderRadius.circular(
-            peerCardUiType.value == PeerUiType.grid ? _cardRadius : _tileRadius,
-          ),
+          borderRadius: BorderRadius.circular(_tileRadius),
         );
       },
       child: gestureDetector(
           child: Obx(() => peerCardUiType.value == PeerUiType.grid
-              ? _buildPeerCard(context, peer, deco)
+              ? _buildPeerCard(context, peer, hover)
               : _buildPeerTile(context, peer, deco))),
     );
   }
@@ -278,107 +276,174 @@ class _PeerCardState extends State<_PeerCard>
     );
   }
 
-  Widget _buildPeerCard(
-      BuildContext context, Peer peer, Rx<BoxDecoration?> deco) {
+  Widget _buildPeerCard(BuildContext context, Peer peer, RxBool hover) {
     hideUsernameOnCard ??=
         bind.mainGetBuildinOption(key: kHideUsernameOnCard) == 'Y';
+    final c = VeraTheme.of(context);
     final name = hideUsernameOnCard == true
         ? peer.hostname
         : '${peer.username}${peer.username.isNotEmpty && peer.hostname.isNotEmpty ? '@' : ''}${peer.hostname}';
-    final child = Card(
-      color: Colors.transparent,
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      // to-do: memory leak here, more investigation needed.
-      // Continious rebuilds of `Obx()` will cause memory leak here.
-      // The simple demo does not have this issue.
-      child: Obx(
-        () => Container(
-          foregroundDecoration: deco.value,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(_cardRadius - _borderWidth),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
+    final title = peer.alias.isEmpty ? formatID(peer.id) : peer.alias;
+    final platform = peer.platform.isEmpty ? name : peer.platform;
+    final online = peer.online;
+    const dockColors = [
+      Color(0xFF6FA8DC),
+      Color(0xFFD9E3EA),
+      Color(0xFF7ED3B2),
+      Color(0xFFE8A86B),
+      Color(0xFF9AA7E6),
+    ];
+
+    final thumb = Container(
+      height: 97,
+      padding: const EdgeInsets.fromLTRB(18, 10, 18, 0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            c.text.withOpacity(0.06),
+            c.text.withOpacity(0.01),
+          ],
+        ),
+      ),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          height: 91,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: const Color(0xFF05090E),
+            border: Border.all(color: const Color(0xFF53616B)),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Container(
+            decoration:
+                VeraTheme.wallpaper(peer.id.hashCode, offline: !online),
+            child: Stack(
               children: [
-                Expanded(
-                  child: Container(
-                    color: str2color('${peer.id}${peer.platform}', 0x7f),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                child:
-                                    getPlatformImage(peer.platform, size: 60),
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Tooltip(
-                                      message: name,
-                                      waitDuration: const Duration(seconds: 1),
-                                      child: Text(
-                                        name,
-                                        style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 12),
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 6,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: dockColors
+                            .map((dc) => Container(
+                                  width: 8,
+                                  height: 8,
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 2),
+                                  decoration: BoxDecoration(
+                                    color: online
+                                        ? dc
+                                        : dc.withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(2),
                                   ),
-                                ],
-                              ),
-                              if (_showNote(peer))
-                                Row(
-                                  children: [
-                                    Expanded(
-                                        child: Tooltip(
-                                      message: peer.note,
-                                      waitDuration: const Duration(seconds: 1),
-                                      child: Text(
-                                        peer.note,
-                                        style: const TextStyle(
-                                            color: Colors.white38,
-                                            fontSize: 10),
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ))
-                                  ],
-                                ),
-                            ],
-                          ).paddingOnly(top: 4.0, left: 4.0, right: 4.0),
-                        ),
-                      ],
+                                ))
+                            .toList(),
+                      ),
                     ),
                   ),
                 ),
-                Container(
-                  color: Theme.of(context).colorScheme.background,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                          child: Row(children: [
-                        getOnline(8, peer.online),
-                        Expanded(
-                            child: Text(
-                          peer.alias.isEmpty ? formatID(peer.id) : peer.alias,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall,
-                        )),
-                      ]).paddingSymmetric(vertical: 8)),
-                      checkBoxOrActionMoreLandscape(peer, isTile: false),
-                    ],
-                  ).paddingSymmetric(horizontal: 12.0),
-                )
               ],
             ),
+          ),
+        ),
+      ),
+    );
+
+    final info = Padding(
+      padding: const EdgeInsets.fromLTRB(13, 10, 6, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Tooltip(
+                  message: name,
+                  waitDuration: const Duration(seconds: 1),
+                  child: Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: c.text),
+                  ),
+                ),
+              ),
+              checkBoxOrActionMoreLandscape(peer, isTile: false),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _showNote(peer) ? '$platform · ${peer.note}' : platform,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 10, color: c.muted),
+                ),
+              ),
+              Container(
+                width: 6,
+                height: 6,
+                margin: const EdgeInsets.only(right: 5, left: 6),
+                decoration: BoxDecoration(
+                  color: online ? c.online : c.muted.withOpacity(0.5),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Text(
+                translate(online ? 'Online' : 'Offline'),
+                style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                    color: online ? c.online : c.muted),
+              ).marginOnly(right: 7),
+            ],
+          ).marginOnly(top: 4),
+        ],
+      ),
+    );
+
+    final child = Obx(
+      () => AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, hover.value ? -3 : 0, 0),
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(VeraTheme.radius),
+          border: Border.all(
+              color: hover.value ? c.accent : c.border, width: 1),
+          boxShadow: hover.value
+              ? [
+                  BoxShadow(
+                      color: c.accent.withOpacity(0.10),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8))
+                ]
+              : null,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(VeraTheme.radius - 1),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              online ? thumb : Opacity(opacity: 0.5, child: thumb),
+              info,
+            ],
           ),
         ),
       ),
@@ -395,14 +460,14 @@ class _PeerCardState extends State<_PeerCard>
         child,
         if (_shouldBuildPasswordIcon(peer))
           Positioned(
-            top: 4,
-            left: 12,
-            child: Icon(Icons.key, size: 12, color: Colors.white),
+            top: 6,
+            left: 8,
+            child: Icon(Icons.key, size: 12, color: c.accent),
           ),
         if (colors.isNotEmpty)
           Positioned(
-            top: 4,
-            right: 12,
+            top: 6,
+            right: 8,
             child: CustomPaint(
               painter: TagPainter(radius: 4, colors: colors),
             ),

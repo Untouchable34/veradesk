@@ -1,3 +1,4 @@
+import 'package:veradesk/vera_theme.dart';
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -22,6 +23,13 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../utils/multi_window_manager.dart';
 
 const double _kTabBarHeight = kDesktopRemoteTabBarHeight;
+// VeraDesk: the main window carries the Nexus title bar (48px, brand + tabs);
+// remote/file/cm windows keep the compact upstream bar.
+const double _kMainTabBarHeight = 48;
+const double _kMainTabHeight = 36;
+
+double _barHeightFor(DesktopTabType tabType) =>
+    tabType == DesktopTabType.main ? _kMainTabBarHeight : _kTabBarHeight;
 const double _kIconSize = 18;
 const double _kDividerIndent = 10;
 const double _kActionIconSize = 12;
@@ -515,18 +523,21 @@ class _DesktopTabState extends State<DesktopTab>
         if (stateGlobal.showTabBar.isTrue &&
             !(kUseCompatibleUiMode && isHideSingleItem())) {
           final showBottomDivider = _showTabBarBottomDivider(tabType);
-          return SizedBox(
-            height: _kTabBarHeight,
+          final barHeight = _barHeightFor(tabType);
+          final c = VeraTheme.of(context);
+          return Container(
+            height: barHeight,
+            color: tabType == DesktopTabType.main ? c.bg : null,
             child: Column(
               children: [
                 SizedBox(
-                  height:
-                      showBottomDivider ? _kTabBarHeight - 1 : _kTabBarHeight,
+                  height: showBottomDivider ? barHeight - 1 : barHeight,
                   child: _buildBar(),
                 ),
                 if (showBottomDivider)
-                  const Divider(
+                  Divider(
                     height: 1,
+                    color: tabType == DesktopTabType.main ? c.border : null,
                   ),
               ],
             ),
@@ -625,14 +636,39 @@ class _DesktopTabState extends State<DesktopTab>
                   }
                 },
                 child: Row(
+                  crossAxisAlignment: tabType == DesktopTabType.main
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.center,
                   children: [
                     Offstage(
                         offstage: !isMacOS,
                         child: const SizedBox(
                           width: 78,
                         )),
+                    if (tabType == DesktopTabType.main &&
+                        !kUseCompatibleUiMode)
+                      SizedBox(
+                        height: _kMainTabBarHeight - 1,
+                        child: Row(children: [
+                          Offstage(
+                            offstage: !showLogo,
+                            child: loadIcon(28),
+                          ),
+                          Text(
+                            appName,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.2,
+                              color: VeraTheme.of(context).text,
+                            ),
+                          ).marginOnly(left: 10),
+                        ]).marginOnly(left: isMacOS ? 0 : 8, right: 20),
+                      ),
                     Offstage(
-                      offstage: kUseCompatibleUiMode || isMacOS,
+                      offstage: kUseCompatibleUiMode ||
+                          isMacOS ||
+                          tabType == DesktopTabType.main,
                       child: Row(children: [
                         Offstage(
                           offstage: !showLogo,
@@ -948,9 +984,7 @@ class _ListView extends StatelessWidget {
   /// Conditions:
   /// - hide single item when only has one item (home) on [DesktopTabPage].
   bool isHideSingleItem() {
-    return state.value.tabs.length == 1 &&
-            controller.tabType == DesktopTabType.main ||
-        controller.tabType == DesktopTabType.install;
+    return controller.tabType == DesktopTabType.install;
   }
 
   onVisibilityChanged(VisibilityInfo info) {
@@ -1081,22 +1115,41 @@ class _TabState extends State<_Tab> with RestorationMixin {
               ? MyTheme.tabbar(context).selectedTabIconColor
               : MyTheme.tabbar(context).unSelectedTabIconColor,
         ).paddingOnly(right: 5));
+    final isMain = widget.tabType == DesktopTabType.main;
+    final c = VeraTheme.of(context);
     final labelWidget = Obx(() {
+      final isHome = isMain && widget.label.value == kTabLabelHomePage;
+      final text = isMain
+          ? translate(isHome ? 'Connection center' : widget.label.value)
+          : widget.label.value;
       return ConstrainedBox(
           constraints: BoxConstraints(maxWidth: widget.maxLabelWidth ?? 200),
           child: Tooltip(
-            message:
-                widget.tabType == DesktopTabType.main ? '' : widget.label.value,
-            child: Text(
-              widget.tabType == DesktopTabType.main
-                  ? translate(widget.label.value)
-                  : widget.label.value,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: isSelected
-                      ? MyTheme.tabbar(context).selectedTextColor
-                      : MyTheme.tabbar(context).unSelectedTextColor),
-              overflow: TextOverflow.ellipsis,
+            message: isMain ? '' : widget.label.value,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isHome)
+                  Icon(Icons.grid_view_rounded,
+                          size: 14, color: isSelected ? c.text : c.muted)
+                      .marginOnly(right: 9),
+                Flexible(
+                  child: Text(
+                    text,
+                    textAlign: TextAlign.center,
+                    style: isMain
+                        ? TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected ? c.text : c.muted)
+                        : TextStyle(
+                            color: isSelected
+                                ? MyTheme.tabbar(context).selectedTextColor
+                                : MyTheme.tabbar(context).unSelectedTextColor),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
           ));
     });
@@ -1146,6 +1199,49 @@ class _TabState extends State<_Tab> with RestorationMixin {
     bool showDivider =
         widget.index != widget.selected - 1 && widget.index != widget.selected;
     RxBool hover = restoreHover.value.obs;
+    if (widget.tabType == DesktopTabType.main) {
+      final c = VeraTheme.of(context);
+      return Align(
+        alignment: Alignment.bottomLeft,
+        child: Obx(() => InkWell(
+              onHover: (value) {
+                hover.value = value;
+                restoreHover.value = value;
+              },
+              onTap: () => widget.onTap(),
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(VeraTheme.radiusSmall)),
+              child: Container(
+                height: _kMainTabHeight,
+                margin: const EdgeInsets.only(right: 9),
+                padding: const EdgeInsets.only(left: 16, right: 10),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? c.surface
+                      : (hover.value ? c.panel.withOpacity(0.6) : null),
+                  border: Border(
+                    top: BorderSide(color: c.border),
+                    left: BorderSide(color: c.border),
+                    right: BorderSide(color: c.border),
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(VeraTheme.radiusSmall)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildTabContent(),
+                    _CloseButton(
+                      visible: hover.value && widget.closable,
+                      tabSelected: isSelected,
+                      onClose: () => widget.onClose(),
+                    ),
+                  ],
+                ),
+              ),
+            )),
+      );
+    }
     return Ink(
       child: InkWell(
         onHover: (value) {
