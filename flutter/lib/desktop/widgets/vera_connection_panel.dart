@@ -16,8 +16,10 @@ class VeraConnectionPanel extends StatelessWidget {
     return Container(
       width: width,
       decoration: VeraTheme.panelGradient(context),
-      padding: const EdgeInsets.fromLTRB(23, 25, 23, 21),
+      // İç boşluk kaydırma alanının içinde: aksi halde kaydırma çubuğu panelin
+      // 23px içinde, yani kopyala/kilit simgelerinin üstünde çiziliyor.
       child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(23, 25, 23, 21),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: children,
@@ -88,8 +90,8 @@ class VeraLabel extends StatelessWidget {
             if (hint != null)
               TextSpan(
                   text: ' · $hint',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w500, color: c.muted)),
+                  style:
+                      TextStyle(fontWeight: FontWeight.w500, color: c.muted)),
           ],
         ),
       ),
