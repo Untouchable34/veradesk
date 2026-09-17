@@ -77,7 +77,11 @@ export ANDROID_NDK_HOME=$HOME/development/android/ndk/28.2.13676358 VCPKG_ROOT=$
 ./flutter/build_android_deps.sh arm64-v8a
 export LIBCLANG_PATH=/opt/homebrew/opt/llvm/lib
 export BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android="--sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
-./flutter/ndk_arm64.sh          # bin hedefleri link hatası verir, liblibveradesk.so yeterli
+# macOS'un ranlib'i ELF arşivlerini indeksleyemez; verilmezse libsodium sembolleri .so'ya
+# girmez ve uygulama açılışta "cannot locate symbol sodium_..." ile çöker
+export AR_aarch64_linux_android=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ar
+export AR=$AR_aarch64_linux_android RANLIB=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ranlib
+./flutter/ndk_arm64.sh          # bin hedefleri de hatasız linklenmeli; link hatası = eksik sembol
 mkdir -p flutter/android/app/src/main/jniLibs/arm64-v8a
 cp target/aarch64-linux-android/release/liblibveradesk.so flutter/android/app/src/main/jniLibs/arm64-v8a/libveradesk.so
 cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so flutter/android/app/src/main/jniLibs/arm64-v8a/
