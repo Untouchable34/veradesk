@@ -85,7 +85,7 @@ export JAVA_HOME=$HOME/development/jdk17/Contents/Home ANDROID_HOME=$HOME/develo
 (cd flutter && flutter build apk --release --target-platform android-arm64 --split-per-abi)
 ```
 
-**Dikkat:** Android bağımlılıkları aynı vcpkg kök dizinine kurulunca manifest modu macOS'un `ffmpeg:arm64-osx` paketini kaldırıyor. Android sonrası macOS derlemesi için `vcpkg install --triplet arm64-osx` komutunu yeniden çalıştır (binary cache sayesinde saniyeler sürer).
+**Dikkat:** Android bağımlılıkları aynı vcpkg kök dizinine kurulunca manifest modu macOS'un `ffmpeg:arm64-osx` paketini kaldırıyor. Android sonrası macOS derlemesi için repo kökünde `$VCPKG_ROOT/vcpkg install --triplet arm64-osx --x-install-root=$VCPKG_ROOT/installed` komutunu yeniden çalıştır (binary cache sayesinde saniyeler sürer). `--x-install-root` verilmezse paketler repo içindeki `vcpkg_installed/` klasörüne gider ve `hwcodec` ffmpeg başlıklarını bulamaz.
 
 Gradle `cargo`yu çağırdığı için `~/.cargo/bin` PATH'te olmalı. Release imzası
 `flutter/android/key.properties` (git dışı) → `~/Desktop/remote/keys/veradesk-release.jks`.
