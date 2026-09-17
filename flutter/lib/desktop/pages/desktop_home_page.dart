@@ -148,11 +148,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       value: gFFI.serverModel,
       child: Consumer<ServerModel>(
         builder: (context, model, child) {
-          String hostname = translate('This device');
-          try {
-            final h = Platform.localHostname;
-            if (h.isNotEmpty) hostname = h.replaceAll('.local', '');
-          } catch (_) {}
+          final hostname = veraDeviceName();
           final showOneTime = model.approveMode != 'click' &&
               model.verificationMethod != kUsePermanentPassword;
           final approvalOn = model.approveMode != 'password';

@@ -4311,3 +4311,14 @@ Widget? buildAvatarWidget({
     ),
   );
 }
+
+/// VeraDesk: bu cihazın görünen adı. Rust tarafındaki `hostname()` ile aynı kaynak
+/// (macOS'ta bilgisayar adı), karşı tarafın gördüğü adla tutarlı olur.
+String veraDeviceName() {
+  try {
+    final info = jsonDecode(bind.mainGetLoginDeviceInfo());
+    final name = (info['name'] ?? '').toString().trim();
+    if (name.isNotEmpty) return name;
+  } catch (_) {}
+  return translate('This device');
+}

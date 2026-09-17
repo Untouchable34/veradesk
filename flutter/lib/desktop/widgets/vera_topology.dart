@@ -55,11 +55,7 @@ class VeraTopology extends StatelessWidget {
         break;
       }
     }
-    String hostname = translate('This device');
-    try {
-      final h = Platform.localHostname;
-      if (h.isNotEmpty) hostname = h.replaceAll('.local', '');
-    } catch (_) {}
+    final hostname = veraDeviceName();
 
     return SizedBox(
       height: height,

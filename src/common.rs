@@ -900,6 +900,15 @@ pub fn whoami_hostname() -> String {
 pub fn hostname() -> String {
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
+        // VeraDesk: macOS'ta ağ adı DHCP'den gelir ("mac.lan" gibi) ve ağa göre
+        // değişir; Paylaşma ayarlarındaki bilgisayar adını tercih et.
+        #[cfg(target_os = "macos")]
+        if let Ok(name) = whoami::fallible::devicename() {
+            let name = name.trim();
+            if !name.is_empty() {
+                return name.to_owned();
+            }
+        }
         #[allow(unused_mut)]
         let mut name = whoami_hostname();
         // some time, there is .local, some time not, so remove it for osx

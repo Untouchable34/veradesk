@@ -116,14 +116,14 @@ const CHARS: &[char] = &[
 
 // ---- VeraDesk branding / server identity -------------------------------------
 // Sunucu: rd.veranilsoft.com (hbbs 21116, hbbr 21117). Public key, sunucuda ilk
-// çalıştırmada üretilen `id_ed25519.pub` dosyasının içeriğidir. TODO: gerçek
-// anahtar ile değiştir (server/README.md).
+// çalıştırmada üretilen `/opt/veradesk/data/id_ed25519.pub` dosyasının içeriğidir
+// (server/README.md).
 pub const VERADESK_APP_NAME: &str = "VeraDesk";
 pub const VERADESK_RENDEZVOUS_SERVER: &str = "rd.veranilsoft.com";
 // GitHub deposu: sürüm kontrolü ve güncelleme indirme buradan yapılır.
 pub const VERADESK_GITHUB_REPO: &str = "veranilsoft/veradesk";
 pub const RENDEZVOUS_SERVERS: &[&str] = &[VERADESK_RENDEZVOUS_SERVER];
-pub const RS_PUB_KEY: &str = "";
+pub const RS_PUB_KEY: &str = "irZq4Ua5mA+VyXRixVD8LcvEZeAK70wlvQ7ykKQ6bFs=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
 pub const RELAY_PORT: i32 = 21117;
