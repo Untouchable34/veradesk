@@ -390,7 +390,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("Accept sessions via click", "Tıklama yoluyla oturumları kabul edin"),
         ("Accept sessions via both", "Her ikisi aracılığıyla oturumları kabul edin"),
         ("Please wait for the remote side to accept your session request...", "Lütfen uzak tarafın oturum isteğinizi kabul etmesini bekleyin..."),
-        ("One-time Password", "Tek Kullanımlık Parola"),
+        ("One-time Password", "Tek seferlik şifre"),
         ("Use one-time password", "Tek seferlik parola kullanın"),
         ("One-time password length", "Tek seferlik parola uzunluğu"),
         ("Request access to your device", "Cihazınıza erişim talep edin"),
@@ -806,5 +806,6 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("A correct password connects without a prompt.", "Doğru şifre onay penceresi olmadan bağlanır."),
         ("Select a device, then choose Transfer file.", "Bir cihaz seç, sonra Dosya aktarımı'nı seç."),
         ("Copy", "Kopyala"),
+        ("Not set", "Belirlenmedi"),
     ].iter().cloned().collect();
 }

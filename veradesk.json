@@ -1,12 +1,12 @@
 {
   "app-name": "VeraDesk",
   "default-settings": {
-    "verification-method": "use-permanent-password",
+    "verification-method": "use-both-passwords",
     "approve-mode": "password",
     "default-remember-password": "Y",
     "enable-check-update": "Y",
     "allow-auto-update": "N",
-    "prompt-permanent-password-on-first-run": "Y",
+    "prompt-permanent-password-on-first-run": "N",
     "allow-hide-cm": "Y"
   },
   "override-settings": {

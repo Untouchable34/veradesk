@@ -151,6 +151,10 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           final hostname = veraDeviceName();
           final showOneTime = model.approveMode != 'click' &&
               model.verificationMethod != kUsePermanentPassword;
+          // VeraDesk: varsayılan "iki şifre birlikte"; tek seferlik şifre her
+          // zaman görünür, kalıcı şifre belirlendiyse o da doğrudan bağlar.
+          final showPermanent =
+              model.verificationMethod != kUseTemporaryPassword;
           final approvalOn = model.approveMode != 'password';
           return Container(
             margin: EdgeInsets.only(top: showBorder ? 22 : 0),
@@ -224,18 +228,14 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        translate(showOneTime
-                            ? 'One-time Password'
-                            : 'Permanent password'),
-                        style: TextStyle(fontSize: 10, color: c.muted),
+                if (showOneTime) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(translate('One-time Password'),
+                            style: TextStyle(fontSize: 10, color: c.muted)),
                       ),
-                    ),
-                    if (showOneTime)
                       GestureDetector(
                         onDoubleTap: () {
                           Clipboard.setData(
@@ -245,15 +245,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                         child: Text(model.serverPasswd.text,
                             style: VeraTheme.mono(context, size: 14)
                                 .copyWith(letterSpacing: 2)),
-                      )
-                    else
-                      Text('• • • • • • • •',
-                          style: TextStyle(
-                              fontSize: 14,
-                              letterSpacing: 2,
-                              color: c.text)),
-                    const SizedBox(width: 8),
-                    if (showOneTime)
+                      ),
+                      const SizedBox(width: 8),
                       AnimatedRotationWidget(
                         onPressed: () => bind.mainUpdateTemporaryPassword(),
                         child: Tooltip(
@@ -264,21 +257,58 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                                   color: c.muted, size: 16)),
                         ),
                       ),
-                    if (!bind.isDisableSettings())
                       Tooltip(
-                        message: translate('Change Password'),
+                        message: translate('Copy'),
                         child: InkWell(
-                          onTap: () => setPasswordDialog(),
+                          onTap: () {
+                            Clipboard.setData(
+                                ClipboardData(text: model.serverPasswd.text));
+                            showToast(translate("Copied"));
+                          },
                           borderRadius: BorderRadius.circular(6),
                           child: Padding(
                             padding: const EdgeInsets.all(4),
-                            child: Icon(Icons.lock_outline,
+                            child: Icon(Icons.copy_outlined,
                                 size: 16, color: c.muted),
                           ),
                         ),
                       ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
+                if (showPermanent) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(translate('Permanent password'),
+                            style: TextStyle(fontSize: 10, color: c.muted)),
+                      ),
+                      model.permanentPasswordSet
+                          ? Text('• • • • • • • •',
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  letterSpacing: 2,
+                                  color: c.text))
+                          : Text(translate('Not set'),
+                              style: TextStyle(fontSize: 11, color: c.muted)),
+                      const SizedBox(width: 8),
+                      if (!bind.isDisableSettings())
+                        Tooltip(
+                          message: translate('Change Password'),
+                          child: InkWell(
+                            onTap: () => setPasswordDialog(),
+                            borderRadius: BorderRadius.circular(6),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Icon(Icons.lock_outline,
+                                  size: 16, color: c.muted),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
                 if (!bind.isDisableSettings())
                   Padding(
                     padding: const EdgeInsets.only(top: 14),
@@ -451,13 +481,15 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             "Warning", "wayland_experiment_tip", "", () async {},
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
             help: 'Help',
-            link: 'https://veranilsoft.com/docs/en/client/linux/#x11-required'));
+            link:
+                'https://veranilsoft.com/docs/en/client/linux/#x11-required'));
       } else if (bind.mainIsLoginWayland()) {
         LinuxCards.add(buildInstallCard("Warning",
             "Login screen using Wayland is not supported", "", () async {},
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
             help: 'Help',
-            link: 'https://veranilsoft.com/docs/en/client/linux/#login-screen'));
+            link:
+                'https://veranilsoft.com/docs/en/client/linux/#login-screen'));
       }
       if (LinuxCards.isNotEmpty) {
         return Column(
@@ -681,7 +713,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
     bool isChattyMethod(String methodName) {
       switch (methodName) {
-        case kWindowBumpMouse: return true;
+        case kWindowBumpMouse:
+          return true;
       }
 
       return false;
@@ -690,7 +723,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     veraDeskWinManager.setMethodHandler((call, fromWindowId) async {
       if (!isChattyMethod(call.method)) {
         debugPrint(
-          "[Main] call ${call.method} with args ${call.arguments} from window $fromWindowId");
+            "[Main] call ${call.method} with args ${call.arguments} from window $fromWindowId");
       }
       if (call.method == kWindowMainWindowOnTop) {
         windowOnTop(null);
@@ -718,9 +751,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           connToken: call.arguments['connToken'],
         );
       } else if (call.method == kWindowBumpMouse) {
-        return RdPlatformChannel.instance.bumpMouse(
-          dx: call.arguments['dx'],
-          dy: call.arguments['dy']);
+        return RdPlatformChannel.instance
+            .bumpMouse(dx: call.arguments['dx'], dy: call.arguments['dy']);
       } else if (call.method == kWindowEventMoveTabToNewWindow) {
         final args = call.arguments.split(',');
         int? windowId;

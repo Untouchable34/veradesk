@@ -34,6 +34,7 @@ class ServerModel with ChangeNotifier {
   bool hideCm = false;
   int _connectStatus = 0; // Rendezvous Server status
   String _verificationMethod = "";
+  bool _permanentPasswordSet = false;
   String _temporaryPasswordLength = "";
   bool _allowNumericOneTimePassword = false;
   String _approveMode = "";
@@ -67,6 +68,9 @@ class ServerModel with ChangeNotifier {
   bool get showElevation => _showElevation;
 
   int get connectStatus => _connectStatus;
+
+  /// VeraDesk: kimlik kartında "Kalıcı şifre: belirlendi / belirlenmedi" için.
+  bool get permanentPasswordSet => _permanentPasswordSet;
 
   String get verificationMethod {
     final index = [
@@ -261,6 +265,12 @@ class ServerModel with ChangeNotifier {
     }
     if (_verificationMethod != verificationMethod) {
       _verificationMethod = verificationMethod;
+      update = true;
+    }
+    final permanentPasswordSet =
+        (await bind.mainGetCommon(key: 'permanent-password-set')) == 'true';
+    if (_permanentPasswordSet != permanentPasswordSet) {
+      _permanentPasswordSet = permanentPasswordSet;
       update = true;
     }
     if (_temporaryPasswordLength != temporaryPasswordLength) {
