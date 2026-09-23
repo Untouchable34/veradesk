@@ -564,3 +564,5 @@ jobs:
             ./release/veradesk-*.msi
             ./release/veradesk-*.dmg
             ./release/veradesk-*.apk
+
+# (kayıt tetikleyici)
