@@ -5,7 +5,7 @@
 # VeraDesk
 
 Veranilsoft'un kendi sunucusuna bağlı, açık kaynak uzak masaüstü istemcisi.
-Windows, macOS ve Android üzerinde çalışır. İndirme: [Releases](https://github.com/veranilsoft/veradesk/releases) · [veranilsoft.com](https://veranilsoft.com)
+Windows, macOS ve Android üzerinde çalışır. İndirme: [Releases](https://github.com/Untouchable34/veradesk/releases) · [veranilsoft.com](https://veranilsoft.com)
 
 ## Özellikler
 

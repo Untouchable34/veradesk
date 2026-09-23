@@ -121,7 +121,7 @@ const CHARS: &[char] = &[
 pub const VERADESK_APP_NAME: &str = "VeraDesk";
 pub const VERADESK_RENDEZVOUS_SERVER: &str = "rd.veranilsoft.com";
 // GitHub deposu: sürüm kontrolü ve güncelleme indirme buradan yapılır.
-pub const VERADESK_GITHUB_REPO: &str = "veranilsoft/veradesk";
+pub const VERADESK_GITHUB_REPO: &str = "Untouchable34/veradesk";
 pub const RENDEZVOUS_SERVERS: &[&str] = &[VERADESK_RENDEZVOUS_SERVER];
 pub const RS_PUB_KEY: &str = "irZq4Ua5mA+VyXRixVD8LcvEZeAK70wlvQ7ykKQ6bFs=";
 
