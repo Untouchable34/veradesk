@@ -39,3 +39,4 @@ Windows ve Android için adımlar iş akışı dosyasındaki ilgili job'larda bi
 AGPL-3.0. Bu proje, AGPL-3.0 lisanslı bir açık kaynak uzak masaüstü projesinin
 (<https://github.com/rustdesk/rustdesk>) türevidir; orijinal telif bildirimleri
 `LICENCE` dosyasında korunmuştur. Üst projenin adı ve logosu bu projede kullanılmaz.
+
