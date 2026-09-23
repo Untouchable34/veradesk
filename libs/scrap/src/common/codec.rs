@@ -976,7 +976,13 @@ pub fn codec_thread_num(limit: usize) -> usize {
     let info;
     let mut s = System::new();
     s.refresh_memory();
-    let memory = s.available_memory() / 1024 / 1024 / 1024;
+    let mut memory = s.available_memory() / 1024 / 1024 / 1024;
+    if memory == 0 {
+        // macOS'ta available_memory() 0 dönüyor; öyle durumda toplam belleğin
+        // yarısını kullanılabilir say. Aksi halde iş parçacığı sayısı 1'e
+        // düşüyor ve 4K yazılım kodlama/çözme gerçek zamanlı yetişemiyor.
+        memory = s.total_memory() / 1024 / 1024 / 1024 / 2;
+    }
     #[cfg(windows)]
     {
         res = 0;

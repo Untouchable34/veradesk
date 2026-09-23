@@ -907,10 +907,15 @@ def build_flutter_dmg(version, features):
     system2(
         f'FLUTTER_XCODE_ARCHS={mac_arch} FLUTTER_XCODE_ONLY_ACTIVE_ARCH=YES flutter build macos --release')
     system2('cp -rf ../target/release/service ./build/macos/Build/Products/Release/VeraDesk.app/Contents/MacOS/')
-    # Yerel derlemede imza kimliği yoksa paketi ad-hoc olarak baştan sona imzala;
-    # aksi halde Flutter framework'ü farklı Team ID taşıdığı için dyld uygulamayı açmaz.
-    if not os.environ.get('MACOS_CODESIGN_IDENTITY'):
-        system2('codesign --force --deep -s - ./build/macos/Build/Products/Release/VeraDesk.app')
+    # Paketi baştan sona tek kimlikle imzala; aksi halde Flutter framework'ü farklı
+    # Team ID taşıdığı için dyld uygulamayı açmaz. MACOS_CODESIGN_IDENTITY verilmezse
+    # ad-hoc imza kullanılır, ama o zaman imza her derlemede değişir ve macOS'un ekran
+    # kaydı/erişilebilirlik izinleri sıfırlanır (bkz. VERADESK.md).
+    identity = os.environ.get('MACOS_CODESIGN_IDENTITY', '-')
+    keychain = os.environ.get('MACOS_CODESIGN_KEYCHAIN')
+    keychain_arg = f' --keychain {keychain}' if keychain else ''
+    system2(
+        f'codesign --force --deep -s "{identity}"{keychain_arg} ./build/macos/Build/Products/Release/VeraDesk.app')
     '''
     system2(
         "create-dmg --volname \"VeraDesk Installer\" --window-pos 200 120 --window-size 800 400 --icon-size 100 --app-drop-link 600 185 --icon VeraDesk.app 200 190 --hide-extension VeraDesk.app veradesk.dmg ./build/macos/Build/Products/Release/VeraDesk.app")
