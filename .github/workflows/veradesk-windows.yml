@@ -24,6 +24,8 @@ env:
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
   VCPKG_COMMIT_ID: "9e593bb18ea69cc5095e012465dcd675a822ed0d"
 
+# Not: rustdesk/engine 'main' özel Flutter motoru ve ona bağlı --vram çizim yolu
+# kaldırıldı; Flutter 3.24.5 ile uyuşmadığında uygulama boş beyaz pencere açıyor.
 jobs:
   build-windows:
     name: windows-x86_64
@@ -77,14 +79,6 @@ jobs:
           architecture: x64
 
       # https://github.com/flutter/flutter/issues/155685
-      - name: Replace engine with veradesk custom flutter engine
-        run: |
-          flutter doctor -v
-          flutter precache --windows
-          Invoke-WebRequest -Uri https://github.com/rustdesk/engine/releases/download/main/windows-x64-release.zip -OutFile windows-x64-release.zip
-          Expand-Archive -Path windows-x64-release.zip -DestinationPath windows-x64-release
-          mv -Force windows-x64-release/*  C:/hostedtoolcache/windows/flutter/stable-${{ env.FLUTTER_VERSION }}-x64/bin/cache/artifacts/engine/windows-x64-release/
-
       - name: Patch flutter
         shell: bash
         run: |
@@ -135,7 +129,7 @@ jobs:
 
       - name: Build VeraDesk
         run: |
-          python3 .\build.py --portable --flutter --skip-portable-pack --hwcodec --vram
+          python3 .\build.py --portable --flutter --skip-portable-pack --hwcodec
           mv ./flutter/build/windows/x64/runner/Release ./veradesk
           # Uygulama exe adı = APP_NAME (kurulum ve MSI bu adı bekler)
           mv ./veradesk/veradesk.exe ./veradesk/VeraDesk.exe
