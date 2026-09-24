@@ -44,9 +44,12 @@ jobs:
           nasm --version
 
       - name: Install flutter
-        uses: subosito/flutter-action@2783a3f08e1baf891508463f8c6653c258246225 # v2.12.0
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+        # Intel runner imajında Flutter 3.47 önyüklü ve subosito action onu
+        # tercih ediyor; kesin sürüm için elle kuruyoruz.
+        run: |
+          git clone --depth 1 -b ${{ env.FLUTTER_VERSION }} https://github.com/flutter/flutter.git "$HOME/flutter-${{ env.FLUTTER_VERSION }}"
+          echo "$HOME/flutter-${{ env.FLUTTER_VERSION }}/bin" >> "$GITHUB_PATH"
+          "$HOME/flutter-${{ env.FLUTTER_VERSION }}/bin/flutter" --version
 
       - name: Patch flutter
         run: |
