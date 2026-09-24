@@ -1,0 +1,139 @@
+# Sadece Intel (x86_64) macOS derlemesi, tek iş. Köprü kodu yerinde üretilir,
+# ara artifact yüklenmez (artifact kota kısıtı). Çıktı macos-intel-dev ön
+# sürümüne DMG olarak eklenir. Apple Silicon ve tam sürüm: veradesk-release.yml
+name: VeraDesk macOS Intel
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: veradesk-macos-intel-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  build-macos-intel:
+    name: macos-x86_64
+    runs-on: macos-15-intel
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          submodules: recursive
+
+      - name: Read version from Cargo.toml
+        run: |
+          VERSION=$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Install build runtime
+        run: |
+          brew install llvm create-dmg
+          if ! command -v pkg-config &>/dev/null; then
+            brew install pkg-config
+          fi
+
+      - name: Install NASM
+        run: |
+          # brew'daki NASM 3.x aom ile uyumsuz; 2.16.x resmi sürüm kullanılır
+          wget https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/macosx/nasm-2.16.03-macosx.zip
+          unzip nasm-2.16.03-macosx.zip
+          sudo cp nasm-2.16.03/nasm /usr/local/bin/nasm
+          nasm --version
+
+      - name: Install flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Patch flutter
+        run: |
+          cd $(dirname $(dirname $(which flutter)))
+          git apply ${{ github.workspace }}/.github/patches/flutter_3.24.4_dropdown_menu_enableFilter.diff
+
+      - name: Workaround for flutter issue
+        shell: bash
+        run: |
+          cd "$(dirname "$(which flutter)")"
+          # https://github.com/flutter/flutter/issues/133533
+          sed -i -e 's/_setFramesEnabledState(false);/\/\/_setFramesEnabledState(false);/g' ../packages/flutter/lib/src/scheduler/binding.dart
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          toolchain: ${{ env.MAC_RUST_VERSION }}
+          targets: x86_64-apple-darwin
+          components: "rustfmt"
+
+      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        with:
+          prefix-key: veradesk-macos-15-intel
+
+
+      - name: Generate flutter-rust bridge
+        run: |
+          cargo install cargo-expand --version ${{ env.CARGO_EXPAND_VERSION }} --locked
+          cargo install flutter_rust_bridge_codegen --version ${{ env.FLUTTER_RUST_BRIDGE_VERSION }} --features "uuid" --locked
+          pushd flutter && flutter pub get && popd
+          ~/.cargo/bin/flutter_rust_bridge_codegen --rust-input ./src/flutter_ffi.rs --dart-output ./flutter/lib/generated_bridge.dart --c-output ./flutter/macos/Runner/bridge_generated.h --llvm-path $(brew --prefix llvm)
+          cp ./flutter/macos/Runner/bridge_generated.h ./flutter/ios/Runner/bridge_generated.h
+          pushd flutter && dart run build_runner build --delete-conflicting-outputs && popd
+
+      - name: Setup vcpkg with Github Actions binary cache
+        uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11
+        with:
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT_ID }}
+          doNotCache: false
+
+      - name: Install vcpkg dependencies
+        run: |
+          if ! $VCPKG_ROOT/vcpkg install --x-install-root="$VCPKG_ROOT/installed"; then
+            find "${VCPKG_ROOT}/" -name "*.log" | while read -r _1; do
+              echo "$_1:"; echo "======"; cat "$_1"; echo "======"; echo ""
+            done
+            exit 1
+          fi
+
+      - name: Build VeraDesk
+        run: |
+          if [ "x86_64-apple-darwin" = "aarch64-apple-darwin" ]; then
+            MIN_MACOS_VERSION="12.3"
+            sed -i -e "s/MACOSX_DEPLOYMENT_TARGET\=[0-9]*.[0-9]*/MACOSX_DEPLOYMENT_TARGET=${MIN_MACOS_VERSION}/" build.py
+            sed -i -e "s/platform :osx, '.*'/platform :osx, '${MIN_MACOS_VERSION}'/" flutter/macos/Podfile
+            sed -i -e "s/osx_minimum_system_version = \"[0-9]*.[0-9]*\"/osx_minimum_system_version = \"${MIN_MACOS_VERSION}\"/" Cargo.toml
+            sed -i -e "s/MACOSX_DEPLOYMENT_TARGET = [0-9]*.[0-9]*;/MACOSX_DEPLOYMENT_TARGET = ${MIN_MACOS_VERSION};/" flutter/macos/Runner.xcodeproj/project.pbxproj
+          fi
+          ./build.py --flutter --hwcodec --unix-file-copy-paste 
+
+      # - name: Codesign app (Apple Developer hesabı alınınca aç)
+      #   run: |
+      #     bash ./.github/scripts/sign-macos-app.sh \
+      #       ./flutter/build/macos/Build/Products/Release/VeraDesk.app \
+      #       ${{ secrets.MACOS_CODESIGN_IDENTITY }} \
+      #       ./flutter/macos/Runner/Release.entitlements
+
+      - name: Create dmg
+        run: |
+          CREATE_DMG="$(readlink -f "$(command -v create-dmg)")"
+          sed -i -e 's/MAXIMUM_UNMOUNTING_ATTEMPTS=3/MAXIMUM_UNMOUNTING_ATTEMPTS=7/' "$CREATE_DMG"
+          mkdir -p dist
+          create-dmg --icon "VeraDesk.app" 200 190 --hide-extension "VeraDesk.app" --window-size 800 400 --app-drop-link 600 185 \
+            dist/veradesk-${{ env.VERSION }}-x86_64.dmg ./flutter/build/macos/Build/Products/Release/VeraDesk.app
+          # codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict dist/veradesk-${{ env.VERSION }}-x86_64.dmg -vvv
+          # rcodesign notary-submit --api-key-path ${{ github.workspace }}/veradesk-notarize.json --staple dist/veradesk-${{ env.VERSION }}-x86_64.dmg
+
+
+      - name: Publish to the macos-intel-dev prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la dist
+          gh release delete macos-intel-dev --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
+          gh release create macos-intel-dev --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" --prerelease \
+            --title "VeraDesk macOS Intel (dev)" \
+            --notes "Elle tetiklenen Intel macOS derlemesi. Commit: $GITHUB_SHA" \
+            dist/*.dmg
